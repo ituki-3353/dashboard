@@ -1,0 +1,9 @@
+{
+  "name": "dashboard-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "echo 'Open index.html in your browser'"
+  },
+  "devDependencies": {
+  }
+}

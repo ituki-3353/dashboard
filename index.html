@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading-overlay">
+        <div id="loading-logs" class="loading-logs"></div>
+        <div class="loader-container">
+            <div class="loader">Now Loading...</div>
+            <div id="loading-status" class="loading-status">Initializing system components...</div>
+        </div>
+        <div id="splash-title" class="splash-title">Dashboard</div>
+    </div>
+    <div class="background-overlay"></div>
+    <div class="app-layout">
+        <aside class="sidebar left">
+            <div class="card">
+                <h3>Weather</h3>
+                <div id="weather-info">Loading...</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>News</h3>
+                    <button id="refresh-news" title="再読み込み">↻</button>
+                </div>
+                <ul id="news-list"></ul>
+            </div>
+        </aside>
+
+        <main class="container">
+            <header class="top-bar" id="main-header">
+                <div id="clock">00:00:00</div>
+            </header>
+
+            <div id="central-message" class="central-message"></div>
+
+            <section class="search-section">
+                <h1 class="logo">Search</h1>
+                <form id="search-form" class="search-box">
+                    <input type="text" id="search-input" placeholder="ウェブを検索" autofocus autocomplete="off">
+                    <button type="submit" id="search-button">
+                        <img src="https://img.icons8.com/?size=100&id=82712&format=png&color=000000" alt="Search">
+                    </button>
+                </form>
+                <div class="quick-links" id="quick-links"></div>
+            </section>
+        </main>
+
+        <aside class="sidebar right">
+            <div class="card">
+                <h3>System</h3>
+                <div id="system-info">Loading...</div>
+            </div>
+            <div class="card">
+                <h3>Memo</h3>
+                <textarea id="memo-input" placeholder="メモを入力..."></textarea>
+            </div>
+        </aside>
+    </div>
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    color: white;
+}
+
+/* ローディング画面 */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.8s ease;
+}
+
+#loading-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader {
+    font-size: 1.2rem;
+    letter-spacing: 5px;
+    animation: blink 2s infinite;
+}
+
+.loader-container {
+    text-align: center;
+    z-index: 10;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.loader-container {
+    text-align: center;
+    z-index: 10;
+}
+
+.loading-status {
+    font-size: 0.8rem;
+    margin-top: 15px;
+    color: #00ff00;
+    font-family: 'Consolas', 'Monaco', monospace;
+    opacity: 0.6;
+    letter-spacing: 1px;
+}
+
+.loading-logs {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.7rem;
+    color: #00ff00;
+    opacity: 0.1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column-reverse; /* 新しいログを下に、古いものを上へ */
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+.loader-container.hidden {
+    display: none;
+}
+
+.loader-container.exit {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.splash-title {
+    position: absolute;
+    display: none;
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 15px;
+    text-transform: uppercase;
+    opacity: 0;
+}
+
+.splash-title.active {
+    display: block;
+    animation: splashSequence 2.5s ease-in-out forwards;
+}
+
+@keyframes splashSequence {
+    0% { opacity: 0; transform: scale(0.95); letter-spacing: 25px; }
+    30% { opacity: 1; transform: scale(1); letter-spacing: 12px; }
+    75% { opacity: 1; transform: scale(1.02); letter-spacing: 14px; }
+    100% { opacity: 0; transform: scale(1.08); letter-spacing: 18px; }
+}
+
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+    background-size: cover;
+    z-index: -1;
+    filter: brightness(0.8);
+}
+
+.app-layout {
+    display: flex;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+}
+
+.sidebar {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 10;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.7;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#refresh-news {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+#refresh-news:hover { opacity: 1; transform: rotate(180deg); }
+
+#memo-input {
+    width: 100%;
+    height: 150px;
+    background: transparent;
+    border: none;
+    color: white;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+}
+
+#news-list {
+    list-style: none;
+    font-size: 0.85rem;
+}
+
+.news-item {
+    margin-bottom: 12px;
+}
+
+.news-link {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: opacity 0.2s;
+}
+
+.news-title {
+    line-height: 1.4;
+}
+
+.news-date {
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
+.news-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.central-message {
+    font-size: 2.2rem;
+    font-weight: 500;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    text-align: center;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.central-message span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(-15px);
+    animation: charFadeIn 0.8s ease forwards;
+}
+
+@keyframes charFadeIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    padding: 10px;
+}
+
+#clock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.2;
+}
+
+.clock-date {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.clock-time {
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+.search-section {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    margin-bottom: 5vh;
+}
+
+.logo {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+}
+
+.search-box {
+    display: flex;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    padding: 4px 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-box:focus-within {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+#search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 10px;
+    background: transparent;
+}
+
+#search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+#search-button img {
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.quick-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 2rem;
+}
+
+.quick-link-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    width: 70px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: background 0.2s, transform 0.2s;
+}
+
+.quick-link-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
