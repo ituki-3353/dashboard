@@ -1,20 +1,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const FAKE_LOGS = [
-        "Initializing kernel modules...",
-        "Checking filesystem integrity...",
-        "Optimizing memory allocation...",
-        "Establishing secure websocket connection...",
-        "Loading UI assets...",
-        "Synchronizing local databases...",
-        "Configuring network stack...",
-        "Validating user session tokens...",
-        "Decrypting environment variables...",
-        "Scanning for hardware acceleration...",
-        "Verifying SSL certificates...",
-        "Mounting virtual partitions...",
-        "Pre-compiling JIT modules...",
-        "Starting background worker threads...",
-        "Waking up peripheral sensors..."
+        "Award Modular BIOS v4.51PG, An Energy Star Ally",
+        "Copyright (C) 1984-98, Award Software, Inc.",
+        "Pentium(R) II - 300MHz",
+        "Memory Test : 65536K OK",
+        "Detecting HDD Primary Master ... Found",
+        "Detecting HDD Primary Slave ... Not Found",
+        "Searching for Boot Record from IDE-0..OK",
+        "HIMEM is testing extended memory...done.",
+        "C:\\>SET BLASTER=A220 I5 D1 T4 P330",
+        "C:\\>SET PATH=C:\\WINDOWS;C:\\WINDOWS\\COMMAND",
+        "C:\\>WIN",
+        "Verifying DMI Pool Data ...........",
+        "Starting DashBD...",
+        "Loading System Tray...",
+        "Establishing Dial-up Connection..."
     ];
 
     const searchForm = document.getElementById('search-form');
@@ -24,35 +24,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     const weatherInfo = document.getElementById('weather-info');
     const newsList = document.getElementById('news-list');
     const centralMessage = document.getElementById('central-message');
-    let currentGreetingText = '';
-    let isDashboardVisible = false;
     const systemInfo = document.getElementById('system-info');
     const refreshNewsBtn = document.getElementById('refresh-news');
-    const header = document.getElementById('main-header');
+    const startBtn = document.getElementById('start-button');
+    const startMenu = document.getElementById('start-menu');
+    const uiToggleBtn = document.getElementById('ui-toggle');
+    const quickLinksWindow = document.getElementById('quick-links-window');
+    const uiToggleInternal = document.getElementById('ui-toggle-internal');
+
+    // UIモードの初期化
+    const initUIMode = () => {
+        const savedMode = localStorage.getItem('ui-mode') || 'classic';
+        if (savedMode === 'modern') {
+            document.body.classList.add('modern-mode');
+        }
+    };
+    initUIMode();
+
+    let currentGreetingText = '';
+    let isDashboardVisible = false;
+    let highestZIndex = 100; // ドラッグ可能なウィンドウのz-index管理用
+    const fullLogs = []; // システムログ保存用
 
     // ローディング中のログ表示用ヘルパー
     const addLoadingLog = (msg) => {
         const logsContainer = document.getElementById('loading-logs');
         const statusEl = document.getElementById('loading-status');
+        fullLogs.push(msg);
+        const logViewer = document.getElementById('full-log-content');
+        if (logViewer) logViewer.innerHTML += `<div>${msg}</div>`;
+
         if (logsContainer) {
             const logEntry = document.createElement('div');
-            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            logsContainer.prepend(logEntry); // 下から上に流れる
-            if (logsContainer.childNodes.length > 50) logsContainer.lastChild.remove();
+            logEntry.style.marginBottom = '2px';
+            logEntry.textContent = msg;
+            logsContainer.appendChild(logEntry); // 末尾に追加
+            
+            if (logsContainer.childNodes.length > 100) logsContainer.firstChild.remove(); // ログ保持数を増加
+            // 下端にスクロール
+            logsContainer.scrollTop = logsContainer.scrollHeight;
         }
         if (statusEl) statusEl.textContent = msg;
     };
 
-    addLoadingLog('Booting Dashboard OS...');
+    const updateProgress = (percent) => {
+        const bar = document.getElementById('bios-progress-bar');
+        if (bar) bar.style.width = `${percent}%`;
+    };
 
-    // ヘッダーのスクロールエフェクト
-    if (header) {
-        window.addEventListener('scroll', () => {
-            header.classList.toggle('scrolled', window.scrollY > 10);
-        });
-    }
-
-    addLoadingLog('Loading search configurations...');
+    addLoadingLog('Powering on system...');
+    updateProgress(5);
+    
+    addLoadingLog('Checking CONFIG.SYS...');
+    updateProgress(15);
 
     // 1. 検索機能 (Bingを使用)
     searchForm.addEventListener('submit', (e) => {
@@ -63,23 +87,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    addLoadingLog('Synchronizing system clock...');
+    addLoadingLog('Initializing system clock...');
+    updateProgress(25);
     // 2. リアルタイム時計
     function updateClock() {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const date = String(now.getDate()).padStart(2, '0');
-        const day = CONFIG.system.dayLabels[now.getDay()];
-
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        clockElement.innerHTML = `
-            <div class="clock-date">${year}年${month}月${date}日 (${day})</div>
-            <div class="clock-time">${hours}:${minutes}:${seconds}</div>
-        `;
+        // タスクバーの時計形式 (例: 14:05)
+        if (clockElement) clockElement.textContent = `${hours}:${minutes}`;
         updateGreeting(now.getHours());
     }
 
@@ -99,33 +119,279 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (fullText === currentGreetingText) return;
         currentGreetingText = fullText;
 
-        centralMessage.innerHTML = '';
-        [...fullText].forEach((char, index) => {
-            const span = document.createElement('span');
-            span.textContent = char;
-            if (char === ' ') span.style.whiteSpace = 'pre';
-            // 1文字ずつ遅延をかけてフェードインさせる
-            span.style.animationDelay = `${index * 0.05}s`;
-            centralMessage.appendChild(span);
-        });
+        // Win98風にフェードインアニメーションを廃止し、即時表示
+        centralMessage.textContent = fullText;
     }
 
     setInterval(updateClock, 1000);
     updateClock();
 
+    // スタートメニューの制御
+    if (startBtn && startMenu) {
+        startBtn.addEventListener('click', () => {
+            startMenu.classList.toggle('show');
+            startBtn.classList.toggle('active');
+        });
+        document.addEventListener('click', (e) => {
+            if (!startBtn.contains(e.target) && !startMenu.contains(e.target)) {
+                startMenu.classList.remove('show');
+                startBtn.classList.remove('active');
+            }
+        });
+    }
+
+    // UIモード切り替え
+    const toggleUI = () => {
+        const isModern = document.body.classList.toggle('modern-mode');
+        localStorage.setItem('ui-mode', isModern ? 'modern' : 'classic');
+        addLoadingLog(`Switching to ${isModern ? 'Modern' : 'Classic'} UI...`);
+    };
+
+    if (uiToggleBtn) uiToggleBtn.addEventListener('click', toggleUI);
+    if (uiToggleInternal) uiToggleInternal.addEventListener('click', toggleUI);
+
+    // タスクバーの更新
+    function updateTaskbar() {
+        const taskbarContainer = document.getElementById('taskbar-apps');
+        if (!taskbarContainer) return;
+        taskbarContainer.innerHTML = '';
+
+        document.querySelectorAll('.draggable-window').forEach(win => {
+            if (win.classList.contains('window-hidden')) return;
+
+            const title = win.querySelector('h3').textContent;
+            const btn = document.createElement('div');
+            btn.className = 'task-item';
+            if (parseInt(win.style.zIndex) === highestZIndex) {
+                btn.classList.add('active');
+            }
+            btn.textContent = title;
+            
+            btn.addEventListener('click', () => {
+                if (parseInt(win.style.zIndex) === highestZIndex) {
+                    // すでに最前面なら最小化
+                    win.classList.add('window-hidden');
+                } else {
+                    // 背面なら最前面へ
+                    openWindow(win.id);
+                }
+                updateTaskbar();
+            });
+            taskbarContainer.appendChild(btn);
+        });
+    }
+
+    // 電卓の簡易実装
+    const calcDisplay = document.getElementById('calc-display');
+    document.querySelectorAll('.calc-grid button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = btn.textContent;
+            if (val === 'C') calcDisplay.textContent = '0';
+            else if (val === '=') {
+                try {
+                    calcDisplay.textContent = eval(calcDisplay.textContent);
+                } catch {
+                    calcDisplay.textContent = 'Error';
+                }
+            } else {
+                if (calcDisplay.textContent === '0') calcDisplay.textContent = val;
+                else calcDisplay.textContent += val;
+            }
+        });
+    });
+
+    // ウィンドウのドラッグ機能
+    function makeDraggable(element) {
+        if (!element) return;
+
+        const header = element.querySelector('.card-header');
+        if (!header) return;
+
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        element.addEventListener('mousedown', () => {
+            element.style.zIndex = ++highestZIndex; // クリックされたら最前面へ
+            updateTaskbar();
+        });
+
+        header.addEventListener('mousedown', (e) => {
+            // 左クリックのみでドラッグ
+            if (e.button !== 0) return;
+
+            // 中央配置用のtransformが残っているとドラッグ計算がズレるため解除する
+            if (element.classList.contains('window-center')) {
+                element.classList.remove('window-center');
+            }
+
+            isDragging = true;
+            element.style.position = 'absolute'; // 絶対配置に設定
+            element.style.zIndex = ++highestZIndex; // 最前面に移動
+            header.style.cursor = 'grabbing';
+
+            // マウスのクリック位置と要素の左上隅の差を計算
+            offsetX = e.clientX - element.getBoundingClientRect().left;
+            offsetY = e.clientY - element.getBoundingClientRect().top;
+
+            // ドラッグ中のイベントリスナーをdocumentに設定
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+
+            // 新しい要素の位置を計算
+            let newX = e.clientX - offsetX;
+            let newY = e.clientY - offsetY;
+
+            // 画面外に出ないように制限
+            newX = Math.max(0, Math.min(newX, window.innerWidth - element.offsetWidth));
+            newY = Math.max(0, Math.min(newY, window.innerHeight - element.offsetHeight - 36)); // タスクバーの高さ分を考慮
+
+            element.style.left = `${newX}px`;
+            element.style.top = `${newY}px`;
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            header.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    }
+
+    // 各カードにドラッグ機能を追加
+    document.querySelectorAll('.card').forEach(card => {
+        makeDraggable(card);
+    });
+
+    // ウィンドウの「×」ボタンで閉じる機能
+    document.querySelectorAll('.window-controls button').forEach(btn => {
+        if (btn.textContent === '×') {
+            btn.addEventListener('click', () => {
+                const win = btn.closest('.draggable-window');
+                if (win) win.classList.add('window-hidden');
+                updateTaskbar();
+            });
+        }
+    });
+
+    // ウィンドウを開く関数
+    const openWindow = (id) => {
+        const win = document.getElementById(id);
+        if (win) {
+            win.classList.remove('window-hidden');
+            win.style.zIndex = ++highestZIndex;
+            updateTaskbar();
+        }
+    };
+
+    // スタートメニューの項目を機能化
+    const startMenuItems = document.querySelectorAll('.start-item');
+    startMenuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation(); // サブメニュー項目クリック時に親に伝播させない
+
+            const openId = item.getAttribute('data-open');
+            if (openId) {
+                openWindow(openId);
+                startMenu.classList.remove('show');
+                startBtn.classList.remove('active');
+                return;
+            }
+
+            // サブメニューを持つ項目自体（Programs, Accessories等）は何もしない
+            if (item.classList.contains('has-submenu')) return;
+
+            const text = item.firstChild.textContent.trim();
+
+            startMenu.classList.remove('show');
+            startBtn.classList.remove('active');
+
+            if (text === 'Run...') {
+                const command = prompt('実行するプログラム名を入力してください:');
+                if (command) alert(`"${command}" を実行しようとしました。`);
+            } else if (text === 'Shut Down...') {
+                // シャットダウン処理を削除（メニューを閉じるのみ）
+            } else {
+                alert(`${text} を開こうとしました。`);
+            }
+        });
+    });
+
+    // プログラムフォルダの中身を生成
+    const programsDir = document.getElementById('programs-dir-content');
+    const internalPrograms = [
+        { name: 'Search.exe', id: 'search-window', icon: 'https://img.icons8.com/color/48/000000/search--v1.png' },
+        { name: 'Weather', id: 'weather-window', icon: 'https://img.icons8.com/color/48/000000/sun--v1.png' },
+        { name: 'News Reader', id: 'news-window', icon: 'https://img.icons8.com/color/48/000000/news.png' },
+        { name: 'SysMon', id: 'system-window', icon: 'https://img.icons8.com/color/48/000000/activity-history.png' },
+        { name: 'Notepad', id: 'notepad-window', icon: 'https://img.icons8.com/color/48/000000/notepad.png' },
+        { name: 'Calculator', id: 'calculator-window', icon: 'https://img.icons8.com/color/48/000000/calculator.png' },
+        { name: 'Links', id: 'quick-links-window', icon: 'https://img.icons8.com/color/48/000000/internet-explorer.png' }
+    ];
+
+    internalPrograms.forEach(prog => {
+        const div = document.createElement('div');
+        div.className = 'quick-link-item folder-item';
+        div.innerHTML = `<img src="${prog.icon}" class="quick-link-icon" alt="${prog.name}"><div>${prog.name}</div>`;
+        div.addEventListener('click', () => openWindow(prog.id));
+        programsDir.appendChild(div);
+    });
+
     // 3. クイックリンクの生成
-    addLoadingLog('Injecting quick links...');
+    addLoadingLog('Loading Desktop icons...');
+    updateProgress(40);
     const linksContainer = document.getElementById('quick-links');
     CONFIG.links.forEach(link => {
         const a = document.createElement('a');
         a.href = link.url;
+        a.target = '_blank'; // 新しいタブで開く
+        a.rel = 'noopener noreferrer';
         a.textContent = link.name;
         a.className = 'quick-link-item';
+
+        const img = document.createElement('img');
+        // 各リンクに対応するアイコンのURLを設定
+        let iconSrc = '';
+        if (link.name === 'Dashboard') {
+            // DashboardはIcons8を使用
+            iconSrc = 'https://img.icons8.com/color/48/000000/dashboard.png';
+        } else {
+            // それ以外はページのファビコンをGoogle経由で参照
+            try {
+                const domain = new URL(link.url).hostname;
+                iconSrc = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+            } catch (e) {
+                iconSrc = 'https://img.icons8.com/color/48/000000/folder-invoices--v1.png';
+            }
+        }
+
+        img.src = iconSrc;
+        img.alt = link.name;
+        img.classList.add('quick-link-icon');
+
+        a.prepend(img); // アイコンをテキストの前に挿入
         linksContainer.appendChild(a);
+
+        // クイックリンクウィンドウにも追加
+        if (quickLinksWindow) {
+            const li = document.createElement('li');
+            const windowLink = document.createElement('a');
+            windowLink.href = link.url;
+            windowLink.target = '_blank';
+            windowLink.rel = 'noopener noreferrer';
+            windowLink.textContent = link.name;
+            windowLink.classList.add('news-link'); // ニュースリンクのスタイルを流用
+            li.appendChild(windowLink);
+            document.getElementById('quick-links-list').appendChild(li);
+        }
     });
 
     // 4. メモ機能 (LocalStorageに保存)
-    addLoadingLog('Connecting to local storage...');
+    addLoadingLog('Opening Notepad.exe...');
+    updateProgress(50);
     if (memoInput) {
         memoInput.value = localStorage.getItem('dashboard-memo') || '';
         memoInput.addEventListener('input', (e) => {
@@ -134,7 +400,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 5. 天気情報の表示 (モックデータ)
-    addLoadingLog('Querying meteorological station...');
+    addLoadingLog('Requesting weather data via Modem...');
+    updateProgress(55);
     if (weatherInfo) {
         weatherInfo.textContent = '東京: 22°C 晴れ';
     }
@@ -151,6 +418,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (let i = 0; i < CONFIG.news.proxies.length; i++) {
                 const config = CONFIG.news.proxies[i];
                 addLoadingLog(`Fetching News: Source[${s}] via ${config.name}...`);
+                updateProgress(60 + (s * 10));
             try {
                 const proxyUrl = config.url(rssUrl);
                 
@@ -256,7 +524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             // ブラウザ実行時 (Web mode) のフォールバック
-            addLoadingLog('Retrieving storage allocation info...');
+            addLoadingLog('Scanning disk drive (C:)...');
             let diskInfo = 'Disk: Access Denied';
             // navigator.storage.estimate() はブラウザのストレージ使用量を推定するAPI
             // Cドライブの空き容量とは異なります
@@ -278,10 +546,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const ping = await getPing();
 
             systemInfo.innerHTML = `
-                <p>${diskInfo}</p>
-                <p>${netType}</p>
-                <p>Google Ping: ${ping}</p>
-                <p style="font-size: 0.7rem; color: #ffca28; margin-top: 5px;">${CONFIG.system.webModeLabel}</p>
+                <div style="font-family: 'Tahoma'; font-size: 0.75rem;">
+                    <div>Disk: ${diskInfo}</div>
+                    <div>Net: ${netType}</div>
+                    <div>Ping: ${ping}</div>
+                    <div style="color: #000080; margin-top: 5px;">${CONFIG.system.webModeLabel}</div>
+                </div>
             `;
         } catch (error) {
             console.error('Failed to get system info:', error);
@@ -289,36 +559,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    addLoadingLog('Executing parallel data acquisition...');
+    addLoadingLog('Starting Explorer.exe...');
 
     // 架空のログのストリーミングを開始
-    const logTimer = setInterval(() => {
+    const logTimer = setInterval(() => { // このタイマーはクリアする必要があります
         const randomMsg = FAKE_LOGS[Math.floor(Math.random() * FAKE_LOGS.length)];
-        addLoadingLog(`[SYS] ${randomMsg}`);
+        addLoadingLog(randomMsg);
     }, 150);
 
     // ニュースとシステム情報の取得を並行して実行し、完了を待機
-    await Promise.all([fetchNews(), updateSystemInfo()]);
+    await Promise.allSettled([fetchNews(), updateSystemInfo()]);
+    updateProgress(100);
     clearInterval(logTimer);
 
     // 7. ローディング画面の解除
     const loadingOverlay = document.getElementById('loading-overlay');
-    const loader = loadingOverlay?.querySelector('.loader');
     const splashTitle = document.getElementById('splash-title');
-    const loaderContainer = loadingOverlay?.querySelector('.loader-container');
 
-    if (loadingOverlay && loader && splashTitle) {
-        addLoadingLog('Handshake complete. Establishing connection...');
-        // データ取得完了後、「Now Loading」を「Dashboard」に切り替え
+    if (loadingOverlay && splashTitle) {
+        addLoadingLog('welcome to DashBD');
+        // データ取得完了後、BIOS画面の各要素を隠してタイトルを表示
         setTimeout(() => {
-            // 1. Now Loadingとログをフェードアウト
-            if (loaderContainer) loaderContainer.classList.add('exit');
-            const logs = document.getElementById('loading-logs');
-            if (logs) logs.style.opacity = '0';
+            // 1. BIOSのテキスト情報をフェードアウト
+            const biosElements = loadingOverlay.querySelectorAll('.bios-header, .bios-logo-text, .loading-logs, .bios-footer');
+            biosElements.forEach(el => el.style.opacity = '0');
 
             setTimeout(() => {
-                // 2. Dashboardタイトルをアニメーション付きで表示
-                if (loaderContainer) loaderContainer.style.display = 'none';
+                // 2. DashBDタイトルをアニメーション付きで表示
                 splashTitle.classList.add('active');
 
                 // 3. 全体のフェードアウト（タイトルの消え際に合わせる）
@@ -328,6 +595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // メイン画面の表示開始に合わせて挨拶アニメーションをトリガー
                     isDashboardVisible = true;
                     updateGreeting(new Date().getHours());
+                    updateTaskbar(); // 起動時に表示されているウィンドウをタスクバーに反映
                 }, 2000);
             }, 600);
             

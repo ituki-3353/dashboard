@@ -5,21 +5,22 @@ const CONFIG = {
         { name: 'YouTube', url: 'https://youtube.com' },
         { name: 'Gmail', url: 'https://gmail.com' },
         { name: 'ChatGPT', url: 'https://chat.openai.com' },
-        { name: 'testserver', url: 'https://127.0.0.1:5500' }
+        { name: 'Dashboard', url: '#' },
+        { name: 'ClassRoom', url: 'https://classroom.google.com' },
     ],
 
     // 挨拶メッセージの設定
     greetings: {
-        morning: 'おはようございます。今日も1日頑張りましょう。',
-        afternoon: 'こんにちは。調子はどうですか？',
-        evening: 'こんばんは。お疲れ様でした。ごゆっくりチルしましょう。',
-        suffix: 'さん'
+        morning: 'User、おはようございます。',
+        afternoon: 'User、こんにちは。',
+        evening: 'User、こんばんは。本日の業務終了時刻が近づいています。',
+        suffix: ' 様'
     },
 
     // 検索設定
     search: {
         url: 'https://www.google.com/search?q=',
-        placeholder: 'googleで検索'
+        placeholder: '実行するキーワードを入力してください'
     },
 
     // ニュース設定
@@ -33,14 +34,14 @@ const CONFIG = {
             { name: 'CodeTabs', url: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, isJson: false },
             { name: 'Corsproxy.io', url: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`, isJson: false }
         ],
-        loadingText: '読み込み中...',
+        loadingText: 'データの受信中...',
         errorText: 'すべてのソースから取得に失敗しました。再試行してください。'
     },
 
     // システム情報設定
     system: {
         pingUrl: 'https://www.google.com/generate_204',
-        webModeLabel: 'Web情報を表示中です。',
+        webModeLabel: 'DashBD 1.0',
         dayLabels: ['日', '月', '火', '水', '木', '金', '土']
     }
 };

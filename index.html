@@ -8,59 +8,226 @@
 </head>
 <body>
     <div id="loading-overlay">
-        <div id="loading-logs" class="loading-logs"></div>
-        <div class="loader-container">
-            <div class="loader">Now Loading...</div>
-            <div id="loading-status" class="loading-status">Initializing system components...</div>
+        <div class="bios-header">
+            Award Modular BIOS v4.51PG, An Energy Star Ally<br>
+            Copyright (C) 1984-98, Award Software, Inc.
         </div>
-        <div id="splash-title" class="splash-title">Dashboard</div>
+        <div class="bios-logo-text">
+            welcome to DashBD
+        </div>
+        <div id="loading-logs" class="loading-logs"></div>
+        <div class="bios-progress-wrapper">
+            <div id="bios-progress-bar" class="bios-progress-bar"></div>
+        </div>
+        <div class="bios-footer">
+            <span id="loading-status">INITIALIZING...</span><br>
+            Press <b>DEL</b> to enter SETUP , <b>ESC</b> to Skip Memory Test
+        </div>
+        <div id="splash-title" class="splash-title">welcome to DashBD</div>
     </div>
     <div class="background-overlay"></div>
-    <div class="app-layout">
-        <aside class="sidebar left">
-            <div class="card">
-                <h3>Weather</h3>
-                <div id="weather-info">Loading...</div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3>News</h3>
-                    <button id="refresh-news" title="再読み込み">↻</button>
-                </div>
-                <ul id="news-list"></ul>
-            </div>
-        </aside>
 
-        <main class="container">
-            <header class="top-bar" id="main-header">
-                <div id="clock">00:00:00</div>
-            </header>
-
-            <div id="central-message" class="central-message"></div>
-
-            <section class="search-section">
-                <h1 class="logo">Search</h1>
-                <form id="search-form" class="search-box">
-                    <input type="text" id="search-input" placeholder="ウェブを検索" autofocus autocomplete="off">
-                    <button type="submit" id="search-button">
-                        <img src="https://img.icons8.com/?size=100&id=82712&format=png&color=000000" alt="Search">
-                    </button>
-                </form>
-                <div class="quick-links" id="quick-links"></div>
-            </section>
-        </main>
-
-        <aside class="sidebar right">
-            <div class="card">
-                <h3>System</h3>
-                <div id="system-info">Loading...</div>
-            </div>
-            <div class="card">
-                <h3>Memo</h3>
-                <textarea id="memo-input" placeholder="メモを入力..."></textarea>
-            </div>
-        </aside>
+    <div class="desktop-icons" id="quick-links">
+        <!-- アイコンはJSで生成 -->
     </div>
+
+    <div class="app-layout">
+        <!-- すべてのウィンドウを独立配置 -->
+        <div id="weather-window" class="card draggable-window window-hidden" style="right: 20px; top: 20px; width: 220px;">
+            <div class="card-header">
+                <h3>Weather</h3>
+                <div class="window-controls"><button>×</button></div>
+            </div>
+            <div class="card-body"><div id="weather-info">Loading...</div></div>
+        </div>
+
+        <div id="news-window" class="card draggable-window window-hidden" style="right: 20px; top: 120px; width: 280px; height: 350px;">
+            <div class="card-header">
+                <h3>News</h3>
+                <div class="window-controls"><button id="refresh-news">↻</button><button>×</button></div>
+            </div>
+            <div class="card-body"><ul id="news-list"></ul></div>
+        </div>
+
+        <div id="search-window" class="card draggable-window window-center" style="width: 500px;">
+            <div class="card-header">
+                <h3>Search.exe</h3>
+                <div class="window-controls"><button>×</button></div>
+            </div>
+            <div class="card-body">
+                <form id="search-form" class="search-box">
+                    <div class="search-field-wrapper">
+                        <label class="search-label">検索キーワード:</label>
+                        <input type="text" id="search-input" placeholder="ウェブを検索" autofocus autocomplete="off">
+                    </div>
+                    <button type="submit" id="search-button">検索</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="system-window" class="card draggable-window window-hidden" style="right: 20px; bottom: 60px; width: 220px;">
+            <div class="card-header">
+                <h3>System</h3>
+                <div class="window-controls"><button>×</button></div>
+            </div>
+            <div class="card-body"><div id="system-info">Loading...</div></div>
+        </div>
+
+        <div id="notepad-window" class="card draggable-window window-hidden" style="left: 300px; top: 250px; width: 400px; height: 300px;">
+            <div class="card-header">
+                <h3>Notepad</h3>
+                <div class="window-controls"><button>×</button></div>
+            </div>
+            <div class="card-body"><textarea id="memo-input" placeholder="メモを入力..."></textarea></div>
+        </div>
+
+        <div id="central-message" class="central-message"></div>
+    </div>
+
+    <!-- 新しいクイックリンクウィンドウ -->
+    <div id="quick-links-window" class="card draggable-window window-hidden" style="left: 250px; top: 50px; width: 250px; height: 300px;">
+        <div class="card-header">
+            <h3>Quick Links</h3>
+            <div class="window-controls"><button>_</button><button>▢</button><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <ul id="quick-links-list" class="quick-links-in-window">
+                <!-- リンクはJSで生成されます -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- 追加: Documents ウィンドウ -->
+    <div id="documents-window" class="card draggable-window window-hidden" style="left: 150px; top: 120px; width: 350px; height: 250px;">
+        <div class="card-header">
+            <h3>My Documents</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <div class="folder-view">
+                <div class="quick-link-item folder-item">
+                    <img src="https://img.icons8.com/color/48/000000/file.png" class="quick-link-icon" alt="Readme">
+                    <div>Readme.txt</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 追加: Settings ウィンドウ -->
+    <div id="settings-window" class="card draggable-window window-hidden" style="left: 200px; top: 180px; width: 300px;">
+        <div class="card-header">
+            <h3>Settings</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <p>UI Mode: <button id="ui-toggle-internal">Toggle Classic/Modern</button></p>
+        </div>
+    </div>
+
+    <!-- 追加: Help ウィンドウ -->
+    <div id="help-window" class="card draggable-window window-hidden" style="left: 250px; top: 150px; width: 300px;">
+        <div class="card-header">
+            <h3>Help Topics</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <p>Welcome to DashBD 1.0.</p>
+            <p>Click Start to begin.</p>
+        </div>
+    </div>
+
+    <!-- 電卓ウィンドウ -->
+    <div id="calculator-window" class="card draggable-window window-hidden" style="left: 400px; top: 150px; width: 200px;">
+        <div class="card-header">
+            <h3>Calculator</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <div class="calc-display" id="calc-display">0</div>
+            <div class="calc-grid">
+                <button>7</button><button>8</button><button>9</button><button>/</button>
+                <button>4</button><button>5</button><button>6</button><button>*</button>
+                <button>1</button><button>2</button><button>3</button><button>-</button>
+                <button>0</button><button>C</button><button>=</button><button>+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- システムログ表示ウィンドウ -->
+    <div id="log-viewer-window" class="card draggable-window window-hidden" style="left: 100px; top: 100px; width: 400px; height: 300px;">
+        <div class="card-header">
+            <h3>System Log Viewer</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body" style="background: black; color: #00ff00; font-family: 'Courier New', monospace; font-size: 0.8rem;" id="full-log-content"></div>
+    </div>
+
+    <!-- プログラムフォルダウィンドウ -->
+    <div id="programs-window" class="card draggable-window window-hidden" style="left: 200px; top: 150px; width: 300px; height: 200px;">
+        <div class="card-header">
+            <h3>C:\PROGRAMS</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body">
+            <div id="programs-dir-content" class="folder-view">
+                <!-- プログラムアイコンがJSで生成されます -->
+            </div>
+        </div>
+    </div>
+
+    <div id="start-menu" class="start-menu">
+        <div class="start-menu-sidebar"><b>Dash</b>BD</div>
+        <div class="start-menu-content">
+            <div class="start-item has-submenu">Programs
+                <div class="start-submenu">
+                    <div class="start-item has-submenu">Accessories
+                        <div class="start-submenu">
+                            <div class="start-item" data-open="notepad-window">Notepad</div>
+                            <div class="start-item" data-open="calculator-window">Calculator</div>
+                        </div>
+                    </div>
+                    <div class="start-item has-submenu">System Tools
+                        <div class="start-submenu">
+                            <div class="start-item" data-open="system-window">System Monitor</div>
+                            <div class="start-item" data-open="log-viewer-window">System Log</div>
+                        </div>
+                    </div>
+                    <div class="start-item has-submenu">DashBD Apps
+                        <div class="start-submenu">
+                            <div class="start-item" data-open="search-window">Search.exe</div>
+                            <div class="start-item" data-open="weather-window">Weather</div>
+                            <div class="start-item" data-open="news-window">News Reader</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="start-item" data-open="programs-window">Programs Folder</div>
+                </div>
+            </div>
+            <div class="start-item" data-open="quick-links-window">Favorites</div>
+            <div class="start-item" data-open="documents-window">Documents</div>
+            <div class="start-item" data-open="settings-window">Settings</div>
+            <div class="start-item" data-open="search-window">Find</div>
+            <div class="start-item" data-open="help-window">Help</div>
+            <div class="start-item">Run...</div>
+            <hr>
+            <div class="start-item">Shut Down...</div>
+        </div>
+    </div>
+
+    <footer class="taskbar">
+        <button id="start-button" class="start-button">
+            <img src="https://img.icons8.com/color/48/000000/windows-95.png" alt="">
+            <span>Start</span>
+        </button>
+        <div class="taskbar-divider"></div>
+        <div class="taskbar-apps" id="taskbar-apps"></div>
+        <div class="system-tray">
+            <button id="ui-toggle" class="tray-btn" title="UIモード切替">⚙️</button>
+            <img src="https://img.icons8.com/color/48/000000/speaker.png" class="tray-icon" alt="Volume">
+            <div id="clock" class="tray-clock">12:00 PM</div>
+        </div>
+    </footer>
+
     <script src="config.js"></script>
     <script src="main.js"></script>
 </body>

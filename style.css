@@ -1,3 +1,14 @@
+/* DashBD Style - Classic Theme */
+:root {
+    --win-bg: #008080; /* Teal background */
+    --win-silver: #c0c0c0;
+    --win-white: #ffffff;
+    --win-dark: #808080;
+    --win-black: #000000;
+    --win-blue: #000080;
+    --win-blue-light: #1084d0;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,9 +17,9 @@
 
 body, html {
     height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Tahoma", "MS Sans Serif", "Arial", sans-serif;
     overflow: hidden;
-    color: white;
+    color: var(--win-black);
 }
 
 /* ローディング画面 */
@@ -18,10 +29,10 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #1a1a1a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: #0000aa !important; /* BIOS Blue */
+    color: #ffffff !important;
+    display: block !important;
+    padding: 40px;
     z-index: 10000;
     transition: opacity 0.8s ease;
 }
@@ -31,48 +42,72 @@ body, html {
     pointer-events: none;
 }
 
-.loader {
-    font-size: 1.2rem;
-    letter-spacing: 5px;
-    animation: blink 2s infinite;
-}
-
-.loader-container {
-    text-align: center;
-    z-index: 10;
-    transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.loader-container {
-    text-align: center;
-    z-index: 10;
-}
-
-.loading-status {
-    font-size: 0.8rem;
-    margin-top: 15px;
-    color: #00ff00;
-    font-family: 'Consolas', 'Monaco', monospace;
-    opacity: 0.6;
-    letter-spacing: 1px;
-}
-
 .loading-logs {
+    position: absolute !important;
+    top: 120px !important;
+    left: 40px !important;
+    bottom: 120px !important;
+    width: calc(100% - 80px) !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
+    font-size: 0.9rem !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+.bios-progress-wrapper {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    bottom: 90px;
+    left: 40px;
+    width: calc(100% - 80px);
+    height: 14px;
+    border: 1px solid #ffffff;
+    padding: 1px;
+}
+
+.bios-progress-bar {
     height: 100%;
-    padding: 20px;
-    font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 0.7rem;
-    color: #00ff00;
-    opacity: 0.1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column-reverse; /* 新しいログを下に、古いものを上へ */
-    pointer-events: none;
-    transition: opacity 1s ease;
+    width: 0%;
+    background-color: #ffffff;
+    background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 85%, #0000aa 85%, #0000aa 100%);
+    background-size: 12px 100%;
+    transition: width 0.3s ease;
+}
+
+.bios-header {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    line-height: 1.2;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+}
+
+.bios-logo-text {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    background-color: #ffffff; /* 白棒での強調表示 */
+    color: #0000aa; /* 背景の青色と同じ色 */
+    padding: 4px 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.bios-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    line-height: 1.5;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+}
+
+.loading-logs::-webkit-scrollbar {
+    display: none; /* スクロールバーを隠してBIOS風にする */
 }
 
 .loader-container.hidden {
@@ -112,102 +147,158 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    background: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
-    background-size: cover;
+    background-color: var(--win-bg);
     z-index: -1;
-    filter: brightness(0.8);
 }
 
 .app-layout {
     display: flex;
-    height: 100vh;
-    padding: 20px;
-    gap: 20px;
+    height: calc(100vh - 36px);
+    padding: 10px;
+    gap: 10px;
+    position: relative;
 }
 
 .sidebar {
-    width: 220px;
+    display: none; /* サイドバーは廃止 */
+}
+
+.desktop-icons {
+    position: absolute;
+    top: 10px;
+    left: 10px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    z-index: 10;
+    z-index: 5;
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border-radius: 16px;
-    padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--win-silver);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    box-shadow: 1px 1px 0 0 var(--win-black);
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+/* ドラッグ可能なウィンドウの基本スタイル */
+.draggable-window {
+    position: absolute; /* 絶対配置で自由に移動可能に */
+    min-width: 150px;
+    min-height: 100px;
+    z-index: 100;
+}
+
+/* 中央配置用のクラス */
+.window-center {
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%);
+}
+
+.window-hidden {
+    display: none !important;
 }
 
 .card h3 {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    opacity: 0.7;
+    color: inherit;
+    padding: 2px 5px;
+    font-size: 0.8rem;
+    margin: 0;
+    flex-grow: 1;
+    pointer-events: none;
+}
+
+.card-body {
+    padding: 6px;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
+    color: white;
+    padding: 1px 2px;
+    height: 18px;
+    cursor: grab; /* ドラッグ可能であることを示すカーソル */
+}
+
+.window-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.window-controls button {
+    background-color: var(--win-silver); /* ボタンの背景色 */
+    border: 2px solid; /* 立体的なボーダー */
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white); /* 立体感を出すための色 */
+    font-weight: bold;
+    font-size: 12px; /* 少し大きく */
+    width: 18px; /* 幅を広げる */
+    height: 18px; /* 高さを広げる */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: default;
+}
+
+.window-controls button:active {
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    padding-top: 2px; /* アクティブ時のパディング調整 */
+    padding-left: 2px;
 }
 
 #refresh-news {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 1.2rem;
-    opacity: 0.5;
-    transition: opacity 0.2s, transform 0.2s;
+    margin-right: 5px;
+    cursor: pointer !important;
 }
-
-#refresh-news:hover { opacity: 1; transform: rotate(180deg); }
 
 #memo-input {
     width: 100%;
     height: 150px;
-    background: transparent;
-    border: none;
-    color: white;
+    background-color: var(--win-white);
+    border: 2px inset var(--win-dark);
+    color: var(--win-black);
     resize: none;
     outline: none;
-    font-family: inherit;
+    font-family: "MS Sans Serif", sans-serif;
+    padding: 4px;
 }
 
 #news-list {
     list-style: none;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .news-item {
-    margin-bottom: 12px;
+    border-bottom: 1px dotted var(--win-dark);
+    padding: 4px 0;
 }
 
 .news-link {
-    color: white;
+    color: var(--win-black);
     text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    transition: opacity 0.2s;
-}
-
-.news-title {
-    line-height: 1.4;
-}
-
-.news-date {
-    font-size: 0.75rem;
-    opacity: 0.5;
 }
 
 .news-link:hover {
-    text-decoration: underline;
-    opacity: 0.8;
+    background-color: var(--win-blue);
+    color: var(--win-white);
+}
+
+.news-title {
+    display: block;
+}
+
+.news-date {
+    font-size: 0.7rem;
+    color: var(--win-dark);
 }
 
 .container {
@@ -216,138 +307,347 @@ body, html {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    padding: 20px 0;
 }
 
 .central-message {
-    font-size: 2.2rem;
-    font-weight: 500;
-    text-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    text-align: center;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-.central-message span {
-    display: inline-block;
-    opacity: 0;
-    transform: translateX(-15px);
-    animation: charFadeIn 0.8s ease forwards;
-}
-
-@keyframes charFadeIn {
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.top-bar {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    font-weight: 300;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    padding: 10px;
-}
-
-#clock {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    line-height: 1.2;
-}
-
-.clock-date {
-    font-size: 0.85rem;
-    opacity: 0.8;
-}
-
-.clock-time {
-    font-size: 1.6rem;
-    font-weight: 500;
+    font-size: 1.6rem; /* 少し大きく */
+    color: var(--win-white);
+    text-shadow: 2px 2px var(--win-black); /* 影を強調 */
+    position: absolute;
+    bottom: 80px; /* タスクバーが大きくなった分、上に移動 */
+    right: 30px; /* 少し内側に移動 */
+    text-align: right;
+    width: 50%; /* テキストが折り返すように幅を設定 */
 }
 
 .search-section {
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
-    margin-bottom: 5vh;
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-window {
+    width: 600px; /* さらにサイズアップ */
 }
 
 .logo {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    letter-spacing: 2px;
+    font-size: 1.5rem;
+    color: var(--win-black);
+    font-style: normal;
+    margin-bottom: 1rem;
+    text-shadow: none;
+    text-align: center;
 }
 
 .search-box {
+    border: 1px solid var(--win-dark);
+    margin: 10px;
+    padding: 20px; /* パディングを増やす */
+    background: #eeeeee;
     display: flex;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    padding: 4px 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
+    flex-direction: column;
+    gap: 15px; /* ギャップを増やす */
 }
 
-.search-box:focus-within {
-    transform: scale(1.02);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+.search-field-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* ギャップを増やす */
+}
+
+.search-label {
+    font-size: 0.9rem; /* 少し大きく */
+    min-width: 80px; /* 幅を広げる */
+    text-align: right; /* 右寄せ */
 }
 
 #search-input {
+    font-size: 1rem; /* 大きく */
     flex: 1;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    padding: 10px;
-    background: transparent;
+    padding: 6px 10px; /* パディングを増やす */
 }
 
 #search-button {
-    background: none;
-    border: none;
+    background-color: var(--win-silver);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
     cursor: pointer;
-    font-size: 1.2rem;
-    color: #555;
+    margin-left: 4px;
+    padding: 4px 15px; /* パディングを増やす */
+    font-family: "Tahoma", sans-serif;
+    font-size: 0.9rem; /* 大きく */
 }
 
-#search-button img {
-    width: 24px;
-    height: 24px;
-    display: block;
-}
-
-.quick-links {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 2rem;
+#search-button:active {
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    padding: 5px 14px 3px 16px; /* アクティブ時のパディング調整 */
 }
 
 .quick-link-item {
-    display: flex;
+    width: 64px;
+    padding: 2px;
+    display: flex; /* アイコンとテキストを縦に並べる */
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: white;
-    width: 70px;
-    padding: 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    transition: background 0.2s, transform 0.2s;
+    color: var(--win-white);
+    font-size: 0.75rem;
+    text-align: center;
+    text-shadow: 1px 1px var(--win-black);
 }
 
-.quick-link-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-3px);
+.quick-links-in-window {
+    list-style: none;
+    padding: 0;
+}
+
+.quick-link-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+    filter: invert(0); /* クラシックモードでアイコンが見えるように */
+}
+
+/* タスクバー */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 36px; /* タスクバーの高さ */
+    background-color: var(--win-silver);
+    border-top: 2px solid var(--win-white);
+    display: flex;
+    align-items: center;
+    padding: 3px; /* パディングを調整 */
+    z-index: 1000;
+}
+
+.start-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    padding: 3px 6px; /* パディングを調整 */
+    height: 30px; /* 高さを調整 */
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    background-color: var(--win-silver);
+    outline: none;
+    font-size: 0.9rem; /* フォントサイズを大きく */
+}
+
+.start-button img { width: 20px; height: 20px; } /* アイコンを大きく */
+.start-button:active, .start-button.active {
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    padding: 4px 5px 2px 7px; /* アクティブ時のパディング調整 */
+}
+
+.taskbar-divider {
+    width: 2px;
+    height: 100%;
+    margin: 0 4px;
+    border-left: 1px solid var(--win-dark);
+    border-right: 1px solid var(--win-white);
+}
+
+.taskbar-apps {
+    flex: 1;
+    display: flex;
+    gap: 3px; /* ギャップを調整 */
+}
+
+.task-item {
+    max-width: 160px;
+    flex: 1;
+    height: 30px; /* 高さを調整 */
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    padding: 0 8px; /* パディングを調整 */
+    font-size: 0.9rem; /* フォントサイズを大きく */
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.task-item.active {
+    border-color: var(--win-dark) var(--win-white) var(--win-white) var(--win-dark);
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.system-tray {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* ギャップを調整 */
+    border: 2px inset var(--win-white);
+    padding: 0 8px; /* パディングを調整 */
+    height: 30px; /* 高さを調整 */
+}
+
+.tray-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px; /* フォントサイズを大きく */
+    padding: 0 3px; /* パディングを調整 */
+    filter: grayscale(1);
+}
+
+.tray-clock { font-size: 0.85rem; } /* フォントサイズを大きく */
+.tray-icon { width: 20px; height: 20px; filter: invert(1); } /* アイコンを大きく */
+
+/* スタートメニュー */
+.start-menu {
+    position: fixed;
+    bottom: 28px;
+    left: 2px;
+    width: 180px;
+    background-color: var(--win-silver);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    display: none;
+    z-index: 1001;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+}
+
+.start-menu.show { display: flex; }
+
+.start-menu-sidebar {
+    background: linear-gradient(0deg, #000080, #1084d0);
+    color: #c0c0c0;
+    width: 25px;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px 5px;
+    font-size: 1.2rem;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.start-menu-content { flex: 1; padding: 2px; }
+.start-item {
+    padding: 5px 10px 5px 30px;
+    font-size: 0.8rem;
+    cursor: default;
+}
+.start-item:hover {
+    background-color: var(--win-blue);
+    color: white;
+}
+
+/* サブメニューのネスト */
+.start-submenu {
+    position: absolute;
+    left: 98%;
+    top: -2px;
+    width: 160px;
+    background-color: var(--win-silver);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    display: none;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+}
+
+.start-item.has-submenu {
+    position: relative;
+}
+
+.start-item.has-submenu::after {
+    content: "▶";
+    float: right;
+    font-size: 0.6rem;
+    margin-top: 2px;
+}
+
+.start-item.has-submenu:hover > .start-submenu {
+    display: block;
+}
+
+/* 電卓スタイル */
+.calc-display {
+    background: #ffffff;
+    border: 2px inset var(--win-dark);
+    margin-bottom: 10px;
+    padding: 5px;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+}
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.calc-grid button {
+    padding: 5px;
+    background: var(--win-silver);
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+}
+
+hr { border: 0; border-top: 1px solid var(--win-dark); border-bottom: 1px solid var(--win-white); margin: 2px 0; }
+
+/* フォルダビュー */
+.folder-view {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px;
+}
+
+.folder-item {
+    cursor: pointer;
+}
+
+/* --- Modern UI Mode --- */
+.modern-mode {
+    --win-bg: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --win-silver: rgba(255, 255, 255, 0.15);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.modern-mode .background-overlay {
+    background: var(--win-bg);
+}
+
+.modern-mode .card {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: var(--win-silver);
+    overflow: hidden;
+}
+
+.modern-mode .card-header {
+    background: rgba(0, 0, 0, 0.2);
+    height: 32px;
+    color: white;
+}
+
+.modern-mode .taskbar {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-top: none;
+    height: 45px;
+    padding: 5px 15px;
+}
+
+.modern-mode #search-input {
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 15px;
+    background: rgba(255,255,255,0.9);
+}
+
+.modern-mode .central-message {
+    font-weight: 200;
+    letter-spacing: 1px;
 }
