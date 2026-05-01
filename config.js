@@ -11,9 +11,12 @@ const CONFIG = {
 
     // 挨拶メッセージの設定
     greetings: {
-        morning: 'User、おはようございます。',
-        afternoon: 'User、こんにちは。',
+        morning: 'User、おはようございます。本日の業務を開始してください',
+        noon: 'User、お疲れ様です。一度休憩を挟みましょう。',
+        afternoon: 'User、こんにちは。午後のひとときですね。',
         evening: 'User、こんばんは。本日の業務終了時刻が近づいています。',
+        nightEarly: 'User、深夜前半ですね。これから深夜作業ですか？',
+        nightLate: 'User、深夜後半です。そろそろ休息を取ることをおすすめします。',
         suffix: ' 様'
     },
 
@@ -26,8 +29,8 @@ const CONFIG = {
     // ニュース設定
     news: {
         sources: [
-            'https://newsdig.tbs.co.jp/list/rss',
-            'https://www.nhk.or.jp/rss/news/cat0.xml'
+            'https://www.nhk.or.jp/rss/news/cat0.xml',
+            'https://newsdig.tbs.co.jp/list/rss'
         ],
         proxies: [
             { name: 'AllOrigins', url: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}&_=${Date.now()}`, isJson: true },
@@ -35,7 +38,7 @@ const CONFIG = {
             { name: 'Corsproxy.io', url: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`, isJson: false }
         ],
         loadingText: 'データの受信中...',
-        errorText: 'すべてのソースから取得に失敗しました。再試行してください。'
+        errorText: '取得失敗 - コンソールをご確認ください。'
     },
 
     // システム情報設定

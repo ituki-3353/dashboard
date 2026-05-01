@@ -192,6 +192,25 @@ body, html {
     z-index: 100;
 }
 
+.fixed-window:not(.window-hidden) {
+    animation: fadeUpIn 0.35s ease-out forwards;
+}
+
+/* 中央配置用のアニメーション（transformの競合回避） */
+.fixed-window.window-center:not(.window-hidden) {
+    animation: fadeUpInCenter 0.35s ease-out forwards;
+}
+
+@keyframes fadeUpIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUpInCenter {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
 /* 中央配置用のクラス */
 .window-center {
     left: 50% !important;
@@ -290,6 +309,12 @@ body, html {
 .news-link:hover {
     background-color: var(--win-blue);
     color: var(--win-white);
+    text-decoration: underline;
+}
+
+/* ホバー時に日付も見やすくする */
+.news-link:hover .news-date {
+    color: #d0d0d0;
 }
 
 .news-title {
@@ -319,6 +344,7 @@ body, html {
     right: 30px; /* 少し内側に移動 */
     text-align: right;
     width: 50%; /* テキストが折り返すように幅を設定 */
+    animation: fadeUpIn 1.2s ease-out forwards;
 }
 
 .search-section {
@@ -595,6 +621,17 @@ body, html {
 
 hr { border: 0; border-top: 1px solid var(--win-dark); border-bottom: 1px solid var(--win-white); margin: 2px 0; }
 
+/* システム情報ラベルの色管理 */
+.sys-info-label {
+    color: var(--win-blue);
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.modern-mode .sys-info-label {
+    color: var(--win-white);
+}
+
 /* フォルダビュー */
 .folder-view {
     display: flex;
@@ -647,6 +684,13 @@ hr { border: 0; border-top: 1px solid var(--win-dark); border-bottom: 1px solid 
     --win-bg: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     --win-silver: rgba(255, 255, 255, 0.15);
     font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--win-white);
+}
+
+/* 入力フォーム内は読みやすさを維持 */
+.modern-mode input,
+.modern-mode textarea {
+    color: var(--win-black);
 }
 
 .modern-mode .background-overlay {

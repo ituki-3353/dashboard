@@ -2,19 +2,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const FAKE_LOGS = [
         "Award Modular BIOS v4.51PG, An Energy Star Ally",
         "Copyright (C) 1984-98, Award Software, Inc.",
-        "Pentium(R) II - 300MHz",
-        "Memory Test : 65536K OK",
-        "Detecting HDD Primary Master ... Found",
-        "Detecting HDD Primary Slave ... Not Found",
+        "07/15/98-i440BX-W977-2A69KG0EC-00",
+        "Pentium(R) II - 450MHz",
+        "Memory Test : 131072K OK",
+        "L2 Cache Size : 512K, Combined",
+        "Award Plug and Play BIOS Extension v1.0A",
+        "Detecting HDD Primary Master ... QUANTUM FIREBALL EX6.4A",
+        "Detecting HDD Primary Slave ... None",
+        "Detecting HDD Secondary Master ... SONY CD-ROM CDU711",
+        "Detecting HDD Secondary Slave ... None",
+        "Verifying DMI Pool Data ........... Success",
         "Searching for Boot Record from IDE-0..OK",
-        "HIMEM is testing extended memory...done.",
+        "HIMEM is testing extended memory... done.",
+        "C:\\>DEVICE=C:\\WINDOWS\\HIMEM.SYS",
+        "C:\\>DEVICE=C:\\WINDOWS\\EMM386.EXE NOEMS",
         "C:\\>SET BLASTER=A220 I5 D1 T4 P330",
         "C:\\>SET PATH=C:\\WINDOWS;C:\\WINDOWS\\COMMAND",
+        "C:\\>MSCDEX.EXE /D:mscd001 /L:D",
         "C:\\>WIN",
-        "Verifying DMI Pool Data ...........",
-        "Starting DashBD...",
-        "Loading System Tray...",
-        "Establishing Dial-up Connection..."
+        "Starting Windows 98...",
+        "Registry scanning... OK",
+        "Initializing vxd dynamic link libraries...",
+        "DashBD Shell v1.0.4 - Initializing...",
+        "Loading System Tray (systray.exe)...",
+        "Establishing Dial-up Connection (TCP/IP)...",
+        "Connection established at 56,000 bps."
     ];
 
     const searchForm = document.getElementById('search-form');
@@ -107,9 +119,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateGreeting(hours) {
         if (!centralMessage || !isDashboardVisible) return;
         let greeting = '';
-        if (hours >= 5 && hours < 12) greeting = CONFIG.greetings.morning;
-        else if (hours >= 12 && hours < 18) greeting = CONFIG.greetings.afternoon;
-        else greeting = CONFIG.greetings.evening;
+        if (hours >= 5 && hours < 11) greeting = CONFIG.greetings.morning;
+        else if (hours >= 11 && hours < 14) greeting = CONFIG.greetings.noon;
+        else if (hours >= 14 && hours < 18) greeting = CONFIG.greetings.afternoon;
+        else if (hours >= 18 && hours < 21) greeting = CONFIG.greetings.evening;
+        else if (hours >= 21 && hours <= 23) greeting = CONFIG.greetings.nightEarly;
+        else greeting = CONFIG.greetings.nightLate;
         
         // LocalStorageに名前が保存されている場合は名前も表示
         const name = localStorage.getItem('user-name') || '';
@@ -119,8 +134,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (fullText === currentGreetingText) return;
         currentGreetingText = fullText;
 
-        // Win98風にフェードインアニメーションを廃止し、即時表示
         centralMessage.textContent = fullText;
+
+        // フェードアップアニメーションを再トリガー
+        centralMessage.style.animation = 'none';
+        centralMessage.offsetHeight; // 強制リフロー
+        centralMessage.style.animation = '';
     }
 
     setInterval(updateClock, 1000);
@@ -149,6 +168,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (uiToggleBtn) uiToggleBtn.addEventListener('click', toggleUI);
     if (uiToggleInternal) uiToggleInternal.addEventListener('click', toggleUI);
+
+    let lastCascadedLeft = 100; // 自動整列ウィンドウの開始左位置
+    let lastCascadedTop = 50;   // 自動整列ウィンドウの開始上位置
+    const CASCADE_STEP = 30;    // カスケードオフセット量
 
     // タスクバーの更新
     function updateTaskbar() {
@@ -254,6 +277,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             highestZIndex++;
             win.style.zIndex = highestZIndex;
             updateTaskbar();
+            
+            // ウィンドウが明示的な位置情報（left, right, top, bottom）を持たず、かつ中央配置でない場合
+            // カスケード位置を適用する
+            const hasExplicitPosition = win.style.left || win.style.right || win.style.top || win.style.bottom;
+            if (!hasExplicitPosition && !win.classList.contains('window-center')) {
+                win.style.left = `${lastCascadedLeft}px`;
+                win.style.top = `${lastCascadedTop}px`;
+
+                // 次のウィンドウのために位置を更新
+                lastCascadedLeft += CASCADE_STEP;
+                lastCascadedTop += CASCADE_STEP;
+
+                // 画面の端に近づいたらリセット（簡易的なもの）
+                if (lastCascadedLeft + win.offsetWidth > window.innerWidth - 200 || lastCascadedTop + win.offsetHeight > window.innerHeight - 100) {
+                    lastCascadedLeft = 100;
+                    lastCascadedTop = 50;
+                }
+            }
             
             // コマンドウィンドウが開かれた場合、自動的に入力にフォーカス
             if (id === 'command-window') {
@@ -462,11 +503,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 // データの抽出と整形
+                const sourceName = rssUrl.includes('nhk.or.jp') ? 'NHK' : (rssUrl.includes('tbs.co.jp') ? 'TBS' : 'News');
                 const items = rawItems.map(item => {
                     const title = item.querySelector("title")?.textContent || 'No Title';
                     const link = item.querySelector("link")?.textContent || item.querySelector("link")?.getAttribute("href") || '#';
                     const pubDateText = item.querySelector("pubDate")?.textContent || item.querySelector("date")?.textContent || '';
-                    return { title, link, date: new Date(pubDateText) };
+                    return { title, link, date: new Date(pubDateText), source: sourceName };
                 });
 
                 // 日付で降順ソート
@@ -476,7 +518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     addLoadingLog(`Success: Parsed ${items.length} news items.`);
                     newsList.innerHTML = items.map(item => `
                         <li class="news-item">
-                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-link">
+                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-link" title="${item.title} [${item.source}]">
                                 <span class="news-title">${item.title}</span>
                                 <span class="news-date">${formatDate(item.date)}</span>
                             </a>
@@ -557,7 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div>Disk: ${diskInfo}</div>
                     <div>Net: ${netType}</div>
                     <div>Ping: ${ping}</div>
-                    <div style="color: #000080; margin-top: 5px;">${CONFIG.system.webModeLabel}</div>
+                    <div class="sys-info-label">${CONFIG.system.webModeLabel}</div>
                 </div>
             `;
         } catch (error) {
@@ -598,6 +640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // 3. 全体のフェードアウト（タイトルの消え際に合わせる）
                 setTimeout(() => {
                     loadingOverlay.classList.add('fade-out');
+                    document.body.classList.add('dashboard-ready');
                     
                     // メイン画面の表示開始に合わせて挨拶アニメーションをトリガー
                     isDashboardVisible = true;
