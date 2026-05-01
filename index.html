@@ -33,7 +33,7 @@
 
     <div class="app-layout">
         <!-- すべてのウィンドウを独立配置 -->
-        <div id="weather-window" class="card draggable-window window-hidden" style="right: 20px; top: 20px; width: 220px;">
+        <div id="weather-window" class="card fixed-window window-hidden" style="width: 220px;">
             <div class="card-header">
                 <h3>Weather</h3>
                 <div class="window-controls"><button>×</button></div>
@@ -41,7 +41,7 @@
             <div class="card-body"><div id="weather-info">Loading...</div></div>
         </div>
 
-        <div id="news-window" class="card draggable-window window-hidden" style="right: 20px; top: 120px; width: 280px; height: 350px;">
+        <div id="news-window" class="card fixed-window" style="right: 20px; top: 20px; width: 280px; height: 350px;">
             <div class="card-header">
                 <h3>News</h3>
                 <div class="window-controls"><button id="refresh-news">↻</button><button>×</button></div>
@@ -49,7 +49,7 @@
             <div class="card-body"><ul id="news-list"></ul></div>
         </div>
 
-        <div id="search-window" class="card draggable-window window-center" style="width: 500px;">
+        <div id="search-window" class="card fixed-window window-center" style="width: 500px;">
             <div class="card-header">
                 <h3>Search.exe</h3>
                 <div class="window-controls"><button>×</button></div>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div id="system-window" class="card draggable-window window-hidden" style="right: 20px; bottom: 60px; width: 220px;">
+        <div id="system-window" class="card fixed-window" style="right: 20px; top: 400px; width: 220px;">
             <div class="card-header">
                 <h3>System</h3>
                 <div class="window-controls"><button>×</button></div>
@@ -73,7 +73,7 @@
             <div class="card-body"><div id="system-info">Loading...</div></div>
         </div>
 
-        <div id="notepad-window" class="card draggable-window window-hidden" style="left: 300px; top: 250px; width: 400px; height: 300px;">
+        <div id="notepad-window" class="card fixed-window window-hidden" style="width: 400px; height: 300px;">
             <div class="card-header">
                 <h3>Notepad</h3>
                 <div class="window-controls"><button>×</button></div>
@@ -85,7 +85,7 @@
     </div>
 
     <!-- 新しいクイックリンクウィンドウ -->
-    <div id="quick-links-window" class="card draggable-window window-hidden" style="left: 250px; top: 50px; width: 250px; height: 300px;">
+    <div id="quick-links-window" class="card fixed-window window-hidden" style="width: 250px; height: 300px;">
         <div class="card-header">
             <h3>Quick Links</h3>
             <div class="window-controls"><button>_</button><button>▢</button><button>×</button></div>
@@ -97,8 +97,23 @@
         </div>
     </div>
 
+    <!-- コマンドプロンプトウィンドウ -->
+    <div id="command-window" class="card fixed-window window-hidden" style="left: 100px; top: 100px; width: 600px; height: 400px;">
+        <div class="card-header">
+            <h3>MS-DOS Prompt</h3>
+            <div class="window-controls"><button>×</button></div>
+        </div>
+        <div class="card-body command-body" id="command-body">
+            <div id="command-output"></div>
+            <div class="command-input-line">
+                <span class="command-prompt">C:\DASHBD></span>
+                <input type="text" id="command-input" spellcheck="false" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
     <!-- 追加: Documents ウィンドウ -->
-    <div id="documents-window" class="card draggable-window window-hidden" style="left: 150px; top: 120px; width: 350px; height: 250px;">
+    <div id="documents-window" class="card fixed-window window-hidden" style="width: 350px; height: 250px;">
         <div class="card-header">
             <h3>My Documents</h3>
             <div class="window-controls"><button>×</button></div>
@@ -114,7 +129,7 @@
     </div>
 
     <!-- 追加: Settings ウィンドウ -->
-    <div id="settings-window" class="card draggable-window window-hidden" style="left: 200px; top: 180px; width: 300px;">
+    <div id="settings-window" class="card fixed-window window-hidden" style="width: 300px;">
         <div class="card-header">
             <h3>Settings</h3>
             <div class="window-controls"><button>×</button></div>
@@ -125,7 +140,7 @@
     </div>
 
     <!-- 追加: Help ウィンドウ -->
-    <div id="help-window" class="card draggable-window window-hidden" style="left: 250px; top: 150px; width: 300px;">
+    <div id="help-window" class="card fixed-window window-hidden" style="width: 300px;">
         <div class="card-header">
             <h3>Help Topics</h3>
             <div class="window-controls"><button>×</button></div>
@@ -137,7 +152,7 @@
     </div>
 
     <!-- 電卓ウィンドウ -->
-    <div id="calculator-window" class="card draggable-window window-hidden" style="left: 400px; top: 150px; width: 200px;">
+    <div id="calculator-window" class="card fixed-window window-hidden" style="width: 200px;">
         <div class="card-header">
             <h3>Calculator</h3>
             <div class="window-controls"><button>×</button></div>
@@ -154,7 +169,7 @@
     </div>
 
     <!-- システムログ表示ウィンドウ -->
-    <div id="log-viewer-window" class="card draggable-window window-hidden" style="left: 100px; top: 100px; width: 400px; height: 300px;">
+    <div id="log-viewer-window" class="card fixed-window window-hidden" style="width: 400px; height: 300px;">
         <div class="card-header">
             <h3>System Log Viewer</h3>
             <div class="window-controls"><button>×</button></div>
@@ -163,7 +178,7 @@
     </div>
 
     <!-- プログラムフォルダウィンドウ -->
-    <div id="programs-window" class="card draggable-window window-hidden" style="left: 200px; top: 150px; width: 300px; height: 200px;">
+    <div id="programs-window" class="card fixed-window window-hidden" style="width: 300px; height: 200px;">
         <div class="card-header">
             <h3>C:\PROGRAMS</h3>
             <div class="window-controls"><button>×</button></div>
@@ -197,6 +212,7 @@
                             <div class="start-item" data-open="search-window">Search.exe</div>
                             <div class="start-item" data-open="weather-window">Weather</div>
                             <div class="start-item" data-open="news-window">News Reader</div>
+                            <div class="start-item" data-open="command-window">command.exe</div>
                         </div>
                     </div>
                     <hr>
@@ -229,6 +245,7 @@
     </footer>
 
     <script src="config.js"></script>
+    <script src="commands.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

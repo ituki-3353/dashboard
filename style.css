@@ -184,9 +184,9 @@ body, html {
     margin-bottom: 5px;
 }
 
-/* ドラッグ可能なウィンドウの基本スタイル */
-.draggable-window {
-    position: absolute; /* 絶対配置で自由に移動可能に */
+/* 固定配置ウィンドウの基本スタイル */
+.fixed-window {
+    position: absolute;
     min-width: 150px;
     min-height: 100px;
     z-index: 100;
@@ -226,7 +226,7 @@ body, html {
     color: white;
     padding: 1px 2px;
     height: 18px;
-    cursor: grab; /* ドラッグ可能であることを示すカーソル */
+    cursor: default; /* ドラッグ機能を削除したためカーソルをデフォルトに */
 }
 
 .window-controls {
@@ -534,6 +534,7 @@ body, html {
     padding: 5px 10px 5px 30px;
     font-size: 0.8rem;
     cursor: default;
+    color: var(--win-black);
 }
 .start-item:hover {
     background-color: var(--win-blue);
@@ -604,6 +605,41 @@ hr { border: 0; border-top: 1px solid var(--win-dark); border-bottom: 1px solid 
 
 .folder-item {
     cursor: pointer;
+}
+
+/* コマンドプロンプトスタイル */
+.command-body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    padding: 10px !important;
+    display: flex;
+    flex-direction: column;
+}
+
+#command-output {
+    white-space: pre-wrap;
+    margin-bottom: 5px;
+}
+
+.command-input-line {
+    display: flex;
+    align-items: center;
+}
+
+.command-prompt {
+    margin-right: 5px;
+    color: #ffffff;
+}
+
+#command-input {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    flex: 1;
 }
 
 /* --- Modern UI Mode --- */

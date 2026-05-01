@@ -156,13 +156,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!taskbarContainer) return;
         taskbarContainer.innerHTML = '';
 
-        document.querySelectorAll('.draggable-window').forEach(win => {
+        document.querySelectorAll('.fixed-window').forEach(win => {
             if (win.classList.contains('window-hidden')) return;
 
             const title = win.querySelector('h3').textContent;
             const btn = document.createElement('div');
             btn.className = 'task-item';
-            if (parseInt(win.style.zIndex) === highestZIndex) {
+            const winZ = parseInt(win.style.zIndex) || 0;
+            if (winZ === highestZIndex && winZ > 0) {
                 btn.classList.add('active');
             }
             btn.textContent = title;
@@ -181,100 +182,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 電卓の簡易実装
+    // 電卓の機能実装
     const calcDisplay = document.getElementById('calc-display');
-    document.querySelectorAll('.calc-grid button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = btn.textContent;
-            if (val === 'C') calcDisplay.textContent = '0';
-            else if (val === '=') {
-                try {
-                    calcDisplay.textContent = eval(calcDisplay.textContent);
-                } catch {
-                    calcDisplay.textContent = 'Error';
+    if (calcDisplay) {
+        const operators = ['+', '-', '*', '/'];
+        document.querySelectorAll('.calc-grid button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = btn.textContent;
+                let current = calcDisplay.textContent;
+
+                if (val === 'C') {
+                    calcDisplay.textContent = '0';
+                } else if (val === '=') {
+                    try {
+                        // 最後の文字が演算子の場合は削除してから計算
+                        if (operators.includes(current.slice(-1))) {
+                            current = current.slice(0, -1);
+                        }
+                        const result = eval(current);
+                        calcDisplay.textContent = Number.isFinite(result) ? result : 'Error';
+                    } catch {
+                        calcDisplay.textContent = 'Error';
+                    }
+                } else if (operators.includes(val)) {
+                    if (current === 'Error') return;
+                    // 演算子の連続入力を防ぎ、直前の演算子を置換する
+                    if (operators.includes(current.slice(-1))) {
+                        calcDisplay.textContent = current.slice(0, -1) + val;
+                    } else {
+                        calcDisplay.textContent += val;
+                    }
+                } else {
+                    // 数値入力の処理（0またはError状態からの入力を考慮）
+                    if (current === '0' || current === 'Error') {
+                        calcDisplay.textContent = val;
+                    } else {
+                        calcDisplay.textContent += val;
+                    }
                 }
-            } else {
-                if (calcDisplay.textContent === '0') calcDisplay.textContent = val;
-                else calcDisplay.textContent += val;
-            }
+            });
         });
-    });
-
-    // ウィンドウのドラッグ機能
-    function makeDraggable(element) {
-        if (!element) return;
-
-        const header = element.querySelector('.card-header');
-        if (!header) return;
-
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        element.addEventListener('mousedown', () => {
-            element.style.zIndex = ++highestZIndex; // クリックされたら最前面へ
-            updateTaskbar();
-        });
-
-        header.addEventListener('mousedown', (e) => {
-            // 左クリックのみでドラッグ
-            if (e.button !== 0) return;
-
-            // 中央配置用のtransformが残っているとドラッグ計算がズレるため解除する
-            if (element.classList.contains('window-center')) {
-                element.classList.remove('window-center');
-            }
-
-            isDragging = true;
-            element.style.position = 'absolute'; // 絶対配置に設定
-            element.style.zIndex = ++highestZIndex; // 最前面に移動
-            header.style.cursor = 'grabbing';
-
-            // マウスのクリック位置と要素の左上隅の差を計算
-            offsetX = e.clientX - element.getBoundingClientRect().left;
-            offsetY = e.clientY - element.getBoundingClientRect().top;
-
-            // ドラッグ中のイベントリスナーをdocumentに設定
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        });
-
-        function onMouseMove(e) {
-            if (!isDragging) return;
-
-            // 新しい要素の位置を計算
-            let newX = e.clientX - offsetX;
-            let newY = e.clientY - offsetY;
-
-            // 画面外に出ないように制限
-            newX = Math.max(0, Math.min(newX, window.innerWidth - element.offsetWidth));
-            newY = Math.max(0, Math.min(newY, window.innerHeight - element.offsetHeight - 36)); // タスクバーの高さ分を考慮
-
-            element.style.left = `${newX}px`;
-            element.style.top = `${newY}px`;
-        }
-
-        function onMouseUp() {
-            isDragging = false;
-            header.style.cursor = 'grab';
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        }
     }
-
-    // 各カードにドラッグ機能を追加
-    document.querySelectorAll('.card').forEach(card => {
-        makeDraggable(card);
-    });
 
     // ウィンドウの「×」ボタンで閉じる機能
     document.querySelectorAll('.window-controls button').forEach(btn => {
         if (btn.textContent === '×') {
             btn.addEventListener('click', () => {
-                const win = btn.closest('.draggable-window');
+                const win = btn.closest('.fixed-window');
                 if (win) win.classList.add('window-hidden');
                 updateTaskbar();
             });
         }
+    });
+
+    // ウィンドウをクリックしたときに最前面に持ってくる機能
+    document.querySelectorAll('.fixed-window').forEach(win => {
+        win.addEventListener('mousedown', () => {
+            if (!win.classList.contains('window-hidden')) {
+                highestZIndex++;
+                win.style.zIndex = highestZIndex;
+                updateTaskbar();
+            }
+        });
     });
 
     // ウィンドウを開く関数
@@ -282,10 +251,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         const win = document.getElementById(id);
         if (win) {
             win.classList.remove('window-hidden');
-            win.style.zIndex = ++highestZIndex;
+            highestZIndex++;
+            win.style.zIndex = highestZIndex;
             updateTaskbar();
+            
+            // コマンドウィンドウが開かれた場合、自動的に入力にフォーカス
+            if (id === 'command-window') {
+                setTimeout(() => document.getElementById('command-input')?.focus(), 50);
+            }
         }
     };
+
+    // コマンド実行ロジック
+    const commandInput = document.getElementById('command-input');
+    const commandOutput = document.getElementById('command-output');
+    const commandBody = document.getElementById('command-body');
+
+    if (commandInput) {
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const fullCmd = commandInput.value.trim();
+                const args = fullCmd.split(' ');
+                const cmd = args[0].toLowerCase();
+                
+                // 出力にコマンドを表示
+                commandOutput.innerHTML += `<div>C:\\DASHBD>${fullCmd}</div>`;
+                
+                if (cmd) {
+                    DashShell.execute(cmd, args.slice(1), {
+                        output: commandOutput,
+                        body: commandBody,
+                        input: commandInput,
+                        updateTaskbar: updateTaskbar,
+                        openWindow: openWindow
+                    });
+                }
+                
+                commandInput.value = '';
+                commandBody.scrollTop = commandBody.scrollHeight;
+            }
+        });
+    }
 
     // スタートメニューの項目を機能化
     const startMenuItems = document.querySelectorAll('.start-item');
@@ -329,7 +335,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         { name: 'SysMon', id: 'system-window', icon: 'https://img.icons8.com/color/48/000000/activity-history.png' },
         { name: 'Notepad', id: 'notepad-window', icon: 'https://img.icons8.com/color/48/000000/notepad.png' },
         { name: 'Calculator', id: 'calculator-window', icon: 'https://img.icons8.com/color/48/000000/calculator.png' },
-        { name: 'Links', id: 'quick-links-window', icon: 'https://img.icons8.com/color/48/000000/internet-explorer.png' }
+        { name: 'Links', id: 'quick-links-window', icon: 'https://img.icons8.com/color/48/000000/internet-explorer.png' },
+        { name: 'Command', id: 'command-window', icon: 'https://img.icons8.com/color/48/000000/console.png' }
     ];
 
     internalPrograms.forEach(prog => {
@@ -419,8 +426,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const config = CONFIG.news.proxies[i];
                 addLoadingLog(`Fetching News: Source[${s}] via ${config.name}...`);
                 updateProgress(60 + (s * 10));
-            try {
-                const proxyUrl = config.url(rssUrl);
+                try {
+                    const proxyUrl = config.url(rssUrl);
                 
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒で次へ
