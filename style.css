@@ -190,14 +190,15 @@ body, html {
     min-width: 150px;
     min-height: 100px;
     z-index: 100;
+    opacity: 0; /* アニメーション開始まで非表示 */
 }
 
-.fixed-window:not(.window-hidden) {
+.dashboard-ready .fixed-window:not(.window-hidden) {
     animation: fadeUpIn 0.35s ease-out forwards;
 }
 
 /* 中央配置用のアニメーション（transformの競合回避） */
-.fixed-window.window-center:not(.window-hidden) {
+.dashboard-ready .fixed-window.window-center:not(.window-hidden) {
     animation: fadeUpInCenter 0.35s ease-out forwards;
 }
 
@@ -344,6 +345,10 @@ body, html {
     right: 30px; /* 少し内側に移動 */
     text-align: right;
     width: 50%; /* テキストが折り返すように幅を設定 */
+    opacity: 0;
+}
+
+.dashboard-ready .central-message {
     animation: fadeUpIn 1.2s ease-out forwards;
 }
 
