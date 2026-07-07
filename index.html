@@ -65,6 +65,23 @@
             </div>
         </div>
 
+        <div id="browser-window" class="card fixed-window window-hidden" style="left: 60px; top: 80px; width: 720px; height: 520px;">
+            <div class="card-header">
+                <h3 id="browser-title">Browser</h3>
+                <div class="window-controls"><button>×</button></div>
+            </div>
+            <div class="card-body browser-body">
+                <div class="browser-toolbar">
+                    <input type="text" id="browser-address" readonly placeholder="URL" />
+                    <button id="browser-refresh" title="Refresh">↻</button>
+                </div>
+                <div class="browser-frame-container">
+                    <iframe id="browser-frame" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" style="display:block;"></iframe>
+                    <div id="browser-results" class="browser-results" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="system-window" class="card fixed-window" style="right: 20px; top: 400px; width: 220px;">
             <div class="card-header">
                 <h3>System</h3>

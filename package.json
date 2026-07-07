@@ -2,8 +2,7 @@
   "name": "dashboard-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "echo 'Open index.html in your browser'"
+    "start": "echo \"This project is designed for static hosting on GitHub Pages.\""
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

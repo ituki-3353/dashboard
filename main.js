@@ -43,6 +43,135 @@ document.addEventListener('DOMContentLoaded', async () => {
     const uiToggleBtn = document.getElementById('ui-toggle');
     const quickLinksWindow = document.getElementById('quick-links-window');
     const uiToggleInternal = document.getElementById('ui-toggle-internal');
+    const browserTitle = document.getElementById('browser-title');
+    const browserAddress = document.getElementById('browser-address');
+    const browserFrame = document.getElementById('browser-frame');
+    const browserResults = document.getElementById('browser-results');
+    const browserRefreshBtn = document.getElementById('browser-refresh');
+    let lastBrowserUrl = '';
+
+    const setBrowserMode = (mode) => {
+        if (browserFrame) browserFrame.style.display = mode === 'iframe' ? 'block' : 'none';
+        if (browserResults) browserResults.style.display = mode === 'result' ? 'block' : 'none';
+    };
+
+    const renderSearchResults = async (query) => {
+        if (!browserResults) return;
+        const apiUrl = `${CONFIG.search.apiUrl}?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+        if (browserTitle) browserTitle.textContent = `Search: ${query}`;
+        if (browserAddress) browserAddress.value = apiUrl;
+        setBrowserMode('result');
+        openWindow('browser-window');
+
+        browserResults.innerHTML = `<div class="result-message">検索中: <strong>${query}</strong></div>`;
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+
+            const heading = data.Heading || query;
+            const abstractText = data.AbstractText || data.Abstract || '';
+            const abstractUrl = data.AbstractURL || data.AbstractURL || '';
+            const relatedTopics = Array.isArray(data.RelatedTopics) ? data.RelatedTopics : [];
+            const resultsHtml = [];
+
+            if (abstractText) {
+                resultsHtml.push(`
+                    <div class="result-item">
+                        <a href="${abstractUrl || `${CONFIG.search.webUrl}${encodeURIComponent(query)}`}" target="_blank" rel="noopener noreferrer" class="result-title">${heading}</a>
+                        <div class="result-snippet">${abstractText}</div>
+                        <div class="result-source">${abstractUrl || CONFIG.search.webUrl}${encodeURIComponent(query)}</div>
+                    </div>
+                `);
+            }
+
+            relatedTopics.slice(0, 8).forEach(topic => {
+                if (topic.Text && topic.FirstURL) {
+                    resultsHtml.push(`
+                        <div class="result-item">
+                            <a href="${topic.FirstURL}" target="_blank" rel="noopener noreferrer" class="result-title">${topic.Text}</a>
+                            <div class="result-source">${topic.FirstURL}</div>
+                        </div>
+                    `);
+                } else if (topic.Topics && topic.Topics.length) {
+                    topic.Topics.slice(0, 4).forEach(sub => {
+                        if (sub.Text && sub.FirstURL) {
+                            resultsHtml.push(`
+                                <div class="result-item">
+                                    <a href="${sub.FirstURL}" target="_blank" rel="noopener noreferrer" class="result-title">${sub.Text}</a>
+                                    <div class="result-source">${sub.FirstURL}</div>
+                                </div>
+                            `);
+                        }
+                    });
+                }
+            });
+
+            if (resultsHtml.length === 0) {
+                browserResults.innerHTML = `
+                    <div class="result-message">検索結果が見つかりませんでした。<br>
+                        <a href="${CONFIG.search.webUrl}${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer">Webで検索する</a>
+                    </div>
+                `;
+            } else {
+                browserResults.innerHTML = resultsHtml.join('');
+            }
+        } catch (error) {
+            console.error('Search API failed:', error);
+            browserResults.innerHTML = `
+                <div class="result-message">検索結果を取得できませんでした。<br>
+                    <a href="${CONFIG.search.webUrl}${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer">Webで直接検索する</a>
+                </div>
+            `;
+        }
+    };
+
+    const isInternalBrowserBlockedUrl = (url) => {
+        try {
+            const parsed = new URL(url, window.location.href);
+            return parsed.hostname === 'news.web.nhk';
+        } catch {
+            return false;
+        }
+    };
+
+    const openBrowserWindow = (url, title) => {
+        if (!url) return;
+        const browserUrl = url === '#' ? 'about:blank' : url;
+        if (browserTitle) browserTitle.textContent = title || 'Browser';
+        if (browserAddress) browserAddress.value = browserUrl;
+
+        if (isInternalBrowserBlockedUrl(browserUrl)) {
+            if (browserFrame) browserFrame.src = 'about:blank';
+            setBrowserMode('result');
+            if (browserResults) {
+                browserResults.innerHTML = `
+                    <div class="result-message">
+                        このページは内部ブラウザ内で表示できません。<br>
+                        <a href="${browserUrl}" target="_blank" rel="noopener noreferrer">別タブで開く</a>
+                    </div>
+                `;
+            }
+            if (openWindow) openWindow('browser-window');
+            window.open(browserUrl, '_blank', 'noopener');
+            return;
+        }
+
+        if (browserFrame) {
+            browserFrame.src = browserUrl;
+        }
+        setBrowserMode('iframe');
+        lastBrowserUrl = browserUrl;
+        if (openWindow) openWindow('browser-window');
+    };
+
+    if (browserRefreshBtn) {
+        browserRefreshBtn.addEventListener('click', () => {
+            if (lastBrowserUrl && browserFrame) {
+                browserFrame.src = lastBrowserUrl;
+            }
+        });
+    }
 
     // UIモードの初期化
     const initUIMode = () => {
@@ -84,20 +213,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (bar) bar.style.width = `${percent}%`;
     };
 
+    const playStartupSound = async () => {
+        const startupSoundUrl = new URL('./JOIN-1.wav', window.location.href).href;
+
+        try {
+            const audio = new Audio(startupSoundUrl);
+            audio.preload = 'auto';
+            audio.volume = 0.35;
+            await audio.play();
+            return;
+        } catch (error) {
+            console.warn('Startup sound file playback failed:', error);
+        }
+
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            const audioContext = new AudioContextClass();
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            const masterGain = audioContext.createGain();
+            masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+            masterGain.gain.exponentialRampToValueAtTime(0.04, audioContext.currentTime + 0.02);
+            masterGain.gain.exponentialRampToValueAtTime(0.02, audioContext.currentTime + 0.18);
+            masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.35);
+            masterGain.connect(audioContext.destination);
+
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(783.99, audioContext.currentTime + 0.14);
+            oscillator.connect(masterGain);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.35);
+            setTimeout(() => audioContext.close().catch(() => {}), 400);
+        } catch (fallbackError) {
+            console.warn('Startup sound fallback playback failed:', fallbackError);
+        }
+    };
+
     addLoadingLog('Powering on system...');
     updateProgress(5);
     
     addLoadingLog('Checking CONFIG.SYS...');
     updateProgress(15);
 
-    // 1. 検索機能 (Bingを使用)
-    searchForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        if (query) {
-            window.location.href = `${CONFIG.search.url}${encodeURIComponent(query)}`;
-        }
-    });
+    // 1. 検索機能 (API 検索結果をダッシュボード内で表示)
+    if (searchForm) {
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (query) {
+                await renderSearchResults(query);
+            }
+        });
+    }
 
     addLoadingLog('Initializing system clock...');
     updateProgress(25);
@@ -392,22 +566,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     addLoadingLog('Loading Desktop icons...');
     updateProgress(40);
     const linksContainer = document.getElementById('quick-links');
-    CONFIG.links.forEach(link => {
+
+    // アイコン（リンク）要素を生成する共通関数
+    const createLinkItem = (link) => {
         const a = document.createElement('a');
-        a.href = link.url;
-        a.target = '_blank'; // 新しいタブで開く
-        a.rel = 'noopener noreferrer';
+        a.href = '#';
         a.textContent = link.name;
         a.className = 'quick-link-item';
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            openBrowserWindow(link.url, link.name);
+        });
 
         const img = document.createElement('img');
-        // 各リンクに対応するアイコンのURLを設定
         let iconSrc = '';
         if (link.name === 'Dashboard') {
-            // DashboardはIcons8を使用
             iconSrc = 'https://img.icons8.com/color/48/000000/dashboard.png';
         } else {
-            // それ以外はページのファビコンをGoogle経由で参照
             try {
                 const domain = new URL(link.url).hostname;
                 iconSrc = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
@@ -415,27 +590,69 @@ document.addEventListener('DOMContentLoaded', async () => {
                 iconSrc = 'https://img.icons8.com/color/48/000000/folder-invoices--v1.png';
             }
         }
-
         img.src = iconSrc;
         img.alt = link.name;
         img.classList.add('quick-link-icon');
+        a.prepend(img);
 
-        a.prepend(img); // アイコンをテキストの前に挿入
-        linksContainer.appendChild(a);
-
-        // クイックリンクウィンドウにも追加
+        // クイックリンクウィンドウ（一覧用）にも追加
         if (quickLinksWindow) {
             const li = document.createElement('li');
             const windowLink = document.createElement('a');
             windowLink.href = link.url;
+            windowLink.textContent = link.name;
             windowLink.target = '_blank';
             windowLink.rel = 'noopener noreferrer';
-            windowLink.textContent = link.name;
-            windowLink.classList.add('news-link'); // ニュースリンクのスタイルを流用
             li.appendChild(windowLink);
             document.getElementById('quick-links-list').appendChild(li);
         }
+        return a;
+    };
+
+    // 1. 通常のアイコン（直下）をレンダリング
+    CONFIG.links.forEach(link => {
+        linksContainer.appendChild(createLinkItem(link));
     });
+    
+    // 2. フォルダーグループをレンダリング
+    CONFIG.linkGroups.forEach(group => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'desktop-group';
+        
+        const folderTrigger = document.createElement('div');
+        folderTrigger.className = 'quick-link-item folder-trigger';
+        folderTrigger.innerHTML = `
+            <img src="https://img.icons8.com/color/48/000000/folder-invoices--v1.png" class="quick-link-icon" alt="Folder">
+            <div>${group.title}</div>
+        `;
+        
+        folderTrigger.addEventListener('click', () => {
+            const wasExpanded = groupEl.classList.contains('is-expanded');
+            // 他のすべてのグループを閉じる
+            document.querySelectorAll('.desktop-group').forEach(el => el.classList.remove('is-expanded'));
+            // クリックしたものが閉じていた場合のみ開く
+            if (!wasExpanded) groupEl.classList.add('is-expanded');
+        });
+
+        groupEl.appendChild(folderTrigger);
+
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 'desktop-group-items';
+
+        group.links.forEach(link => itemsEl.appendChild(createLinkItem(link)));
+
+        groupEl.appendChild(itemsEl);
+        linksContainer.appendChild(groupEl);
+    });
+
+    if (newsList) {
+        newsList.addEventListener('click', (e) => {
+            const target = e.target.closest('a.news-link');
+            if (!target) return;
+            e.preventDefault();
+            openBrowserWindow(target.href, target.querySelector('.news-title')?.textContent?.trim() || 'News');
+        });
+    }
 
     // 4. メモ機能 (LocalStorageに保存)
     addLoadingLog('Opening Notepad.exe...');
@@ -454,88 +671,192 @@ document.addEventListener('DOMContentLoaded', async () => {
         weatherInfo.textContent = '東京: 22°C 晴れ';
     }
 
-    // ニュース取得機能 (ハイブリッド・パースとソース・フォールバック)
+    // ニュース取得機能 (外部API優先、RSSフォールバック)
     async function fetchNews(retries = 3) {
         if (!newsList) return;
         newsList.innerHTML = `<li>${CONFIG.news.loadingText}</li>`;
 
+        const renderItems = (items) => {
+            const safeItems = items
+                .filter(item => item.link && item.link !== '#')
+                .sort((a, b) => b.date - a.date)
+                .slice(0, 8);
+
+            if (safeItems.length === 0) return false;
+
+            newsList.innerHTML = safeItems.map(item => `
+                <li class="news-item">
+                    <a href="${item.link}" class="news-link" title="${item.title} [${item.source}]">
+                        <span class="news-title">${item.title}</span>
+                        <span class="news-date">${formatDate(item.date)}</span>
+                    </a>
+                </li>
+            `).join('');
+            return true;
+        };
+
+        let apiErrorMessage = null;
+
+        if (!CONFIG.news.apiUrl || !CONFIG.news.apiKey) {
+            apiErrorMessage = 'NewsAPI.org の API キーが設定されていません。config.js の CONFIG.news.apiKey を有効なキーに設定してください。';
+            addLoadingLog(apiErrorMessage);
+        }
+
+        if (CONFIG.news.apiUrl && CONFIG.news.apiKey) {
+            const fetchNewsApi = async (url) => {
+                addLoadingLog(`Fetching News from NewsAPI.org: ${url}`);
+                updateProgress(60);
+                const response = await fetch(url, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => '');
+                    throw new Error(`HTTP ${response.status} ${errorText}`);
+                }
+                const data = await response.json();
+
+                if (data.status && data.status !== 'ok') {
+                    throw new Error(data.message || data.status);
+                }
+
+                let items = [];
+                if (Array.isArray(data.articles)) {
+                    items = data.articles.map(article => ({
+                        title: article.title || article.description || 'No Title',
+                        link: article.url || '#',
+                        date: new Date(article.publishedAt || Date.now()),
+                        source: article.source?.name || 'News'
+                    }));
+                } else if (Array.isArray(data.results)) {
+                    items = data.results.map(article => ({
+                        title: article.title || article.description || 'No Title',
+                        link: article.link || article.url || '#',
+                        date: article.pubDateEpoch ? new Date(article.pubDateEpoch * 1000) : new Date(article.pubDate || Date.now()),
+                        source: article.source_id || article.source || 'News'
+                    }));
+                } else if (Array.isArray(data.data)) {
+                    items = data.data.map(article => ({
+                        title: article.title || 'No Title',
+                        link: article.url || article.link || '#',
+                        date: new Date(article.pubDate || article.publishedAt || Date.now()),
+                        source: article.source || 'News'
+                    }));
+                }
+
+                if (renderItems(items)) {
+                    addLoadingLog(`Success: Retrieved ${items.length} API news items.`);
+                    return true;
+                }
+
+                return false;
+            };
+
+            try {
+                const separator = CONFIG.news.apiUrl.includes('?') ? '&' : '?';
+                let apiUrl = `${CONFIG.news.apiUrl}${separator}apiKey=${encodeURIComponent(CONFIG.news.apiKey)}`;
+                let rendered = await fetchNewsApi(apiUrl);
+
+                if (!rendered && CONFIG.news.apiUrl.includes('/v2/top-headlines')) {
+                    const fallbackUrl = `https://newsapi.org/v2/everything?q=Japan&language=en&pageSize=12&apiKey=${encodeURIComponent(CONFIG.news.apiKey)}`;
+                    addLoadingLog('Top headlines returned no articles; retrying with fallback query.');
+                    rendered = await fetchNewsApi(fallbackUrl);
+                }
+
+                if (rendered) {
+                    return;
+                }
+
+                throw new Error('API responseにニュース記事が含まれていません');
+            } catch (error) {
+                apiErrorMessage = error.message;
+                addLoadingLog(`NewsAPI.org fetch failed: ${error.message}`);
+                console.warn('News API error', error);
+            }
+        }
+
         // ソースとプロキシを組み合わせて試行
         for (let s = 0; s < CONFIG.news.sources.length; s++) {
             const rssUrl = CONFIG.news.sources[s];
-            
+
             for (let i = 0; i < CONFIG.news.proxies.length; i++) {
                 const config = CONFIG.news.proxies[i];
                 addLoadingLog(`Fetching News: Source[${s}] via ${config.name}...`);
                 updateProgress(60 + (s * 10));
                 try {
                     const proxyUrl = config.url(rssUrl);
-                
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒で次へ
 
-                const response = await fetch(proxyUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒で次へ
 
-                if (!response.ok) throw new Error(`HTTP status: ${response.status}`);
+                    const response = await fetch(proxyUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
 
-                let xmlText;
-                if (config.isJson) {
-                    const data = await response.json();
-                    xmlText = data.contents;
-                } else {
-                    xmlText = await response.text();
+                    if (!response.ok) throw new Error(`HTTP status: ${response.status}`);
+
+                    let xmlText;
+                    if (config.isJson) {
+                        const data = await response.json();
+                        xmlText = data.contents;
+                    } else {
+                        xmlText = await response.text();
+                    }
+
+                    if (!xmlText) throw new Error('取得したデータが空です');
+
+                    const parser = new DOMParser();
+                    let doc, rawItems = [];
+
+                    // --- ハイブリッド・パース戦略 ---
+                    doc = parser.parseFromString(xmlText, 'text/xml');
+                    if (!doc.querySelector('parsererror')) {
+                        rawItems = Array.from(doc.getElementsByTagName('item'));
+                    }
+
+                    if (rawItems.length === 0) {
+                        doc = parser.parseFromString(xmlText, 'text/html');
+                        rawItems = Array.from(doc.querySelectorAll('item'));
+                    }
+
+                    const sourceName = rssUrl.includes('nhk.or.jp') ? 'NHK' : (rssUrl.includes('tbs.co.jp') ? 'TBS' : 'News');
+                    const items = rawItems.map(item => {
+                        const title = item.querySelector('title')?.textContent || 'No Title';
+                        const link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || '#';
+                        const pubDateText = item.querySelector('pubDate')?.textContent || item.querySelector('date')?.textContent || '';
+                        return { title, link, date: new Date(pubDateText), source: sourceName };
+                    });
+
+                    items.sort((a, b) => b.date - a.date);
+
+                    if (items.length > 0) {
+                        addLoadingLog(`Success: Parsed ${items.length} news items.`);
+                        newsList.innerHTML = items.map(item => `
+                            <li class="news-item">
+                                <a href="${item.link}" class="news-link" title="${item.title} [${item.source}]">
+                                    <span class="news-title">${item.title}</span>
+                                    <span class="news-date">${formatDate(item.date)}</span>
+                                </a>
+                            </li>
+                        `).slice(0, 8).join('');
+                        return; // 成功
+                    } else {
+                        throw new Error('有効なニュース項目が見つかりませんでした');
+                    }
+                } catch (error) {
+                    const errorMsg = error.name === 'AbortError' ? 'タイムアウト' : error.message;
+                    addLoadingLog(`Warning: Proxy ${config.name} rejected. Reason: ${errorMsg}`);
+                    console.warn(`Attempt with ${config.name} on source ${s} failed: ${errorMsg}`);
                 }
-
-                if (!xmlText) throw new Error("取得したデータが空です");
-
-                const parser = new DOMParser();
-                let doc, rawItems = [];
-
-                // --- ハイブリッド・パース戦略 ---
-                doc = parser.parseFromString(xmlText, "text/xml");
-                if (!doc.querySelector("parsererror")) {
-                    rawItems = Array.from(doc.getElementsByTagName("item"));
-                }
-
-                if (rawItems.length === 0) {
-                    doc = parser.parseFromString(xmlText, "text/html");
-                    rawItems = Array.from(doc.querySelectorAll("item"));
-                }
-
-                // データの抽出と整形
-                const sourceName = rssUrl.includes('nhk.or.jp') ? 'NHK' : (rssUrl.includes('tbs.co.jp') ? 'TBS' : 'News');
-                const items = rawItems.map(item => {
-                    const title = item.querySelector("title")?.textContent || 'No Title';
-                    const link = item.querySelector("link")?.textContent || item.querySelector("link")?.getAttribute("href") || '#';
-                    const pubDateText = item.querySelector("pubDate")?.textContent || item.querySelector("date")?.textContent || '';
-                    return { title, link, date: new Date(pubDateText), source: sourceName };
-                });
-
-                // 日付で降順ソート
-                items.sort((a, b) => b.date - a.date);
-
-                if (items.length > 0) {
-                    addLoadingLog(`Success: Parsed ${items.length} news items.`);
-                    newsList.innerHTML = items.map(item => `
-                        <li class="news-item">
-                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-link" title="${item.title} [${item.source}]">
-                                <span class="news-title">${item.title}</span>
-                                <span class="news-date">${formatDate(item.date)}</span>
-                            </a>
-                        </li>
-                    `).slice(0, 8).join('');
-                    return; // 成功
-                } else {
-                    throw new Error("有効なニュース項目が見つかりませんでした");
-                }
-            } catch (error) {
-                const errorMsg = error.name === 'AbortError' ? 'タイムアウト' : error.message;
-                addLoadingLog(`Warning: Proxy ${config.name} rejected. Reason: ${errorMsg}`);
-                console.warn(`Attempt with ${config.name} on source ${s} failed: ${errorMsg}`);
             }
-            }
-            }
-        newsList.innerHTML = `<li>${CONFIG.news.errorText}</li>`;
+        }
+        if (apiErrorMessage) {
+            newsList.innerHTML = `
+                <li class="news-item">
+                    ${apiErrorMessage}
+                </li>
+            `;
+        } else {
+            newsList.innerHTML = `<li>${CONFIG.news.errorText}</li>`;
+        }
     }
 
     // 日付フォーマット用ヘルパー
@@ -639,6 +960,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 3. 全体のフェードアウト（タイトルの消え際に合わせる）
                 setTimeout(() => {
+                    playStartupSound();
                     loadingOverlay.classList.add('fade-out');
                     document.body.classList.add('dashboard-ready');
                     

@@ -1,12 +1,26 @@
 const CONFIG = {
-    // クイックリンクの設定
+    // デスクトップに直接置くリンク（通常アイコン）
     links: [
         { name: 'GitHub', url: 'https://github.com' },
-        { name: 'YouTube', url: 'https://youtube.com' },
-        { name: 'Gmail', url: 'https://gmail.com' },
-        { name: 'ChatGPT', url: 'https://chat.openai.com' },
         { name: 'Dashboard', url: '#' },
-        { name: 'ClassRoom', url: 'https://classroom.google.com' },
+    ],
+
+    // デスクトップグループとリンクの設定
+    linkGroups: [
+        {
+            title: 'MAIN SERVICES',
+            links: [
+                { name: 'Gmail', url: 'https://gmail.com' },
+                { name: 'ClassRoom', url: 'https://classroom.google.com' },
+            ]
+        },
+        {
+            title: 'TOOLS & AI',
+            links: [
+                { name: 'ChatGPT', url: 'https://chat.openai.com' },
+                { name: 'YouTube', url: 'https://youtube.com' },
+            ]
+        }
     ],
 
     // 挨拶メッセージの設定
@@ -22,12 +36,15 @@ const CONFIG = {
 
     // 検索設定
     search: {
-        url: 'https://www.google.com/search?q=',
+        apiUrl: 'https://api.duckduckgo.com/',
+        webUrl: 'https://duckduckgo.com/?q=',
         placeholder: '実行するキーワードを入力してください'
     },
 
     // ニュース設定
     news: {
+        apiUrl: 'https://newsapi.org/v2/everything?q=Japan&language=en&pageSize=12',
+        apiKey: '891e650fb3c349e784c08bf4c89c586b', // ここに NewsAPI.org の API キーを設定してください
         sources: [
             'https://www.nhk.or.jp/rss/news/cat0.xml',
             'https://newsdig.tbs.co.jp/list/rss'

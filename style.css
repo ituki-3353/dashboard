@@ -238,6 +238,101 @@ body, html {
     overflow-y: auto;
 }
 
+.browser-body {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    min-height: 0;
+}
+
+.browser-frame-container {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.browser-toolbar {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid var(--win-dark);
+}
+
+#browser-address {
+    flex: 1;
+    border: 1px solid var(--win-dark);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    background: #ffffff;
+    color: var(--win-black);
+}
+
+#browser-refresh {
+    width: 32px;
+    border: 2px solid;
+    border-color: var(--win-white) var(--win-dark) var(--win-dark) var(--win-white);
+    background: var(--win-silver);
+    cursor: pointer;
+}
+
+#browser-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 0px);
+    border: none;
+    min-height: 0;
+    background: white;
+}
+
+.browser-results {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 0px);
+    overflow-y: auto;
+    background: #ffffff;
+    color: #000;
+    font-size: 0.9rem;
+    padding: 10px;
+}
+
+.browser-results .result-item {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed #999;
+}
+
+.browser-results .result-title {
+    display: block;
+    font-weight: bold;
+    color: #003399;
+    text-decoration: none;
+    margin-bottom: 4px;
+}
+
+.browser-results .result-snippet {
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.browser-results .result-source {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.browser-results .result-message {
+    padding: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -440,6 +535,46 @@ body, html {
     height: 32px;
     margin-bottom: 4px;
     filter: invert(0); /* クラシックモードでアイコンが見えるように */
+}
+
+/* --- デスクトップグループ (フォルダー展開形式) --- */
+.desktop-group {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 5px;
+    user-select: none;
+}
+
+.folder-trigger {
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.folder-trigger:active {
+    transform: scale(0.9);
+}
+
+.desktop-group-items {
+    display: none; /* 初期状態は非表示 */
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px 15px;
+    margin-left: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px dashed rgba(255, 255, 255, 0.4);
+    justify-content: center;
+    width: 220px;
+    border-radius: 4px;
+}
+
+.desktop-group.is-expanded .desktop-group-items {
+    display: flex; /* 展開時のみ表示 */
+}
+
+/* 展開中のフォルダを強調 */
+.desktop-group.is-expanded .folder-trigger img {
+    filter: brightness(1.2) drop-shadow(0 0 5px rgba(255,255,255,0.5));
 }
 
 /* タスクバー */
@@ -735,4 +870,16 @@ hr { border: 0; border-top: 1px solid var(--win-dark); border-bottom: 1px solid 
 .modern-mode .central-message {
     font-weight: 200;
     letter-spacing: 1px;
+}
+
+.modern-mode .desktop-group {
+    background: transparent;
+    border: none;
+}
+
+.modern-mode .desktop-group-items {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
 }
